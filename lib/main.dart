@@ -1,7 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-void main() => runApp(const MyApp());
+class BlogPost {
+  final String title;
+  final String content;
+
+  const BlogPost({required this.title, required this.content});
+}
+
+final blogPosts = {
+  '1': const BlogPost(
+    title: 'Adventure in Italy: A Journey Through Wine Country',
+    content: 'From the rolling vineyards of Tuscany to the historic cellars of Piedmont, '
+        'join us on an unforgettable tour through the wine regions of Italy.',
+  ),
+  '2': const BlogPost(
+    title: 'Discovering Paris: The City of Lights',
+    content: 'Paris, a city known for its art, architecture, and cafe culture. '
+        'Experience the grandeur of the Eiffel Tower, the charm of Montmartre, '
+        'and the elegance of the Louvre on this comprehensive journey through the City of Lights.',
+  ),
+};
 
 final _router = GoRouter(
   routes: [
@@ -11,15 +30,14 @@ final _router = GoRouter(
       routes: [
         GoRoute(
           path: 'post/:id',
-          builder: (context, state) {
-            final id = state.pathParameters['id']!;
-            return BlogPostScreen(postId: id);
-          },
+          builder: (context, state) => BlogPostScreen(postId: state.pathParameters['id']!),
         ),
       ],
     ),
   ],
 );
+
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -27,8 +45,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerDelegate: _router.routerDelegate,
-      routeInformationParser: _router.routeInformationParser,
+      routerConfig: _router,
     );
   }
 }
@@ -45,6 +62,7 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(8),
         children: [
+          // ignore: prefer_const_constructors
           BlogPostListItem(
             postId: '1',
             title: 'Adventure in the Italy',
@@ -66,14 +84,14 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class BlogPostListItem extends StatefulWidget {
+class BlogPostListItem extends StatelessWidget {
   final String postId;
   final String title;
   final String summary;
   final String imageUrl;
   final String imageAttribution;
 
-  BlogPostListItem({
+  const BlogPostListItem({
     Key? key,
     required this.postId,
     required this.title,
@@ -83,68 +101,36 @@ class BlogPostListItem extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _BlogPostListItemState createState() => _BlogPostListItemState();
-}
-
-class _BlogPostListItemState extends State<BlogPostListItem> {
-  bool _isHovering = false;
-
-  @override
   Widget build(BuildContext context) {
-    return Material(
-      child: InkWell(
-        // on tap go to the blog post screen
-        onTap: () => context.go('post/${widget.postId}'),
-        onHover: (isHovering) {
-          setState(() {
-            _isHovering = isHovering;
-          });
-        },
-        child: Card(
-          child: Column(
-            children: [
-              Stack(
-                alignment: Alignment.bottomLeft,
+    return GestureDetector(
+      onTap: () => context.go('/post/$postId'),
+      child: Card(
+        child: Column(
+          children: [
+            Image.network(
+              imageUrl,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.asset(
-                    widget.imageUrl,
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover,
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                  if (_isHovering)
-                    Container(
-                      padding: const EdgeInsets.all(8.0),
-                      color: Colors.black54,
-                      child: Text(
-                        widget.imageAttribution,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
+                  const SizedBox(height: 8),
+                  Text(
+                    summary,
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.title,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.summary,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -158,13 +144,40 @@ class BlogPostScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final post = blogPosts[postId] ?? const BlogPost(title: '', content: 'No content available for this post');
     return Scaffold(
       appBar: AppBar(
-        title: Text('Blog Post $postId'),
+        title: Text(post.title),
       ),
-      body: Center(
-        child: Text('Content of Blog Post $postId'),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: PostContent(post: post),
+        ),
       ),
+    );
+  }
+}
+
+class PostContent extends StatelessWidget {
+  final BlogPost post;
+
+  const PostContent({Key? key, required this.post}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          post.title,
+          style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          post.content,
+          style: const TextStyle(fontSize: 18),
+        ),
+      ],
     );
   }
 }
