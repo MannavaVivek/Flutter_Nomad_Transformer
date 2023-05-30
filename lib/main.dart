@@ -8,6 +8,22 @@ class BlogPost {
   const BlogPost({required this.title, required this.content});
 }
 
+class BlogPostListItemData {
+  final String postId;
+  final String title;
+  final String summary;
+  final String imageUrl;
+  final String imageAttribution;
+
+  const BlogPostListItemData({
+    required this.postId,
+    required this.title,
+    required this.summary,
+    required this.imageUrl,
+    required this.imageAttribution,
+  });
+}
+
 final blogPosts = {
   '1': const BlogPost(
     title: 'Adventure in Italy: A Journey Through Wine Country',
@@ -50,7 +66,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   static const countryNames = [
@@ -65,6 +81,127 @@ class HomeScreen extends StatelessWidget {
     'Slovakia',
   ];
 
+  static const List<BlogPostListItemData> recommendedReads = [
+    BlogPostListItemData(
+      postId: '1',
+      title: 'Adventure in Italy',
+      summary: 'A thrilling journey through wine country...',
+      imageUrl:
+          'https://raw.githubusercontent.com/MannavaVivek/MannavaVivek.github.io/main/assets/italy_unsplash.jpg',
+      imageAttribution: 'Photo by Chris Karidis on Unsplash',
+    ),
+    BlogPostListItemData(
+      postId: '2',
+      title: 'Discovering Paris',
+      summary: 'The city of lights has so much to offer...',
+      imageUrl:
+          'https://raw.githubusercontent.com/MannavaVivek/MannavaVivek.github.io/main/assets/paris_unsplash.jpg',
+      imageAttribution: 'Photo by Mattia Righetti on Unsplash',
+    ),
+  ];
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  final ScrollController _exploreScrollController = ScrollController();
+  final ScrollController _recommendedReadsScrollController = ScrollController();
+  bool _showExploreLeftScrollButton = false;
+  bool _showExploreRightScrollButton = false;
+  bool _showRecommendedReadsLeftScrollButton = false;
+  bool _showRecommendedReadsRightScrollButton = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _exploreScrollController.addListener(() {
+      setState(() {
+        _showExploreLeftScrollButton = _exploreScrollController.offset > 0;
+        _showExploreRightScrollButton =
+            _exploreScrollController.position.maxScrollExtent -
+                    _exploreScrollController.offset >
+                0;
+      });
+    });
+    _recommendedReadsScrollController.addListener(() {
+      setState(() {
+        _showRecommendedReadsLeftScrollButton =
+            _recommendedReadsScrollController.offset > 0;
+        _showRecommendedReadsRightScrollButton =
+            _recommendedReadsScrollController.position.maxScrollExtent -
+                    _recommendedReadsScrollController.offset >
+                0;
+      });
+    });
+    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance!.addPostFrameCallback(
+        (_) => calculateIfScrollButtonsNeeded(context));
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance!.removeObserver(this);
+    _exploreScrollController.dispose();
+    _recommendedReadsScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    calculateIfScrollButtonsNeeded(context);
+  }
+
+  void calculateIfScrollButtonsNeeded(BuildContext context) {
+    final exploreTotalItemWidth = HomeScreen.countryNames.length * 116.0;
+    final exploreScreenWidth = MediaQuery.of(context).size.width;
+    final recommendedReadsTotalItemWidth =
+        HomeScreen.recommendedReads.length * 350.0;
+    final recommendedReadsScreenWidth = MediaQuery.of(context).size.width;
+
+    setState(() {
+      _showExploreLeftScrollButton =
+          exploreTotalItemWidth > exploreScreenWidth;
+      _showExploreRightScrollButton =
+          exploreTotalItemWidth > exploreScreenWidth;
+      _showRecommendedReadsLeftScrollButton =
+          recommendedReadsTotalItemWidth > recommendedReadsScreenWidth;
+      _showRecommendedReadsRightScrollButton =
+          recommendedReadsTotalItemWidth > recommendedReadsScreenWidth;
+    });
+  }
+
+  void _scrollExploreLeft() {
+    _exploreScrollController.animateTo(
+      _exploreScrollController.offset - 200,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _scrollExploreRight() {
+    _exploreScrollController.animateTo(
+      _exploreScrollController.offset + 200,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _scrollRecommendedReadsLeft() {
+    _recommendedReadsScrollController.animateTo(
+      _recommendedReadsScrollController.offset - 400,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _scrollRecommendedReadsRight() {
+    _recommendedReadsScrollController.animateTo(
+      _recommendedReadsScrollController.offset + 400,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,79 +209,224 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Home Page'),
       ),
-      body: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Explore',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Container(
-            height: 150,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: countryNames.map((country) {
-                  return Container(
-                    width: 120,
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: Image.network(
-                            'https://raw.githubusercontent.com/MannavaVivek/MannavaVivek.github.io/main/assets/${country.toLowerCase()}_unsplash.jpg',// <- Here
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final exploreScreenWidth = constraints.maxWidth;
+          final exploreTotalItemWidth = HomeScreen.countryNames.length * 116.0;
+          final showExploreScrollButtons =
+              exploreTotalItemWidth > exploreScreenWidth;
+
+          final recommendedReadsScreenWidth = constraints.maxWidth;
+          final recommendedReadsTotalItemWidth =
+              HomeScreen.recommendedReads.length * 350.0;
+          final showRecommendedReadsScrollButtons =
+              recommendedReadsTotalItemWidth > recommendedReadsScreenWidth;
+
+          return ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Explore',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Stack(
+                children: [
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: _exploreScrollController,
+                    child: Row(
+                      children: HomeScreen.countryNames.map((country) {
+                        return Container(
+                          width: 120,
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: Image.network(
+                                  'https://raw.githubusercontent.com/MannavaVivek/MannavaVivek.github.io/main/assets/${country.toLowerCase()}_unsplash.jpg',
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(country),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  if (showExploreScrollButtons)
+                    Positioned(
+                      top: 0,
+                      bottom: 0,
+                      left: 0,
+                      child: AnimatedOpacity(
+                        opacity: _showExploreLeftScrollButton ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 300),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: _showExploreLeftScrollButton ? 40.0 : 0.0,
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: GestureDetector(
+                              onTap: _scrollExploreLeft,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey.withOpacity(0.5),
+                                ),
+                                padding: EdgeInsets.all(8),
+                                child: Icon(
+                                  Icons.arrow_back_ios,
+                                  color: Colors.black,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                        SizedBox(height: 8),
-                        Text(country),
-                      ],
+                      ),
                     ),
-                  );
-                }).toList(),
+                  if (showExploreScrollButtons)
+                    Positioned(
+                      top: 0,
+                      bottom: 0,
+                      right: 0,
+                      child: AnimatedOpacity(
+                        opacity: _showExploreRightScrollButton ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 300),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: _showExploreRightScrollButton ? 40.0 : 0.0,
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: GestureDetector(
+                              onTap: _scrollExploreRight,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey.withOpacity(0.5),
+                                ),
+                                padding: EdgeInsets.all(8),
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.black,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Recommended Reads',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Container(
-            height: 350,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                BlogPostListItem(
-                  postId: '1',
-                  title: 'Adventure in Italy',
-                  summary: 'A thrilling journey through wine country...',
-                  imageUrl: 'https://raw.githubusercontent.com/MannavaVivek/MannavaVivek.github.io/main/assets/italy_unsplash.jpg',
-                  imageAttribution: 'Photo by Chris Karidis on Unsplash',
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Recommended Reads',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                BlogPostListItem(
-                  postId: '2',
-                  title: 'Discovering Paris',
-                  summary: 'The city of lights has so much to offer...',
-                  imageUrl: 'https://raw.githubusercontent.com/MannavaVivek/MannavaVivek.github.io/main/assets/paris_unsplash.jpg',
-                  imageAttribution: 'Photo by Mattia Righetti on Unsplash',
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+              Stack(
+                children: [
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: _recommendedReadsScrollController,
+                    child: Row(
+                      children: HomeScreen.recommendedReads.map((item) {
+                        return Container(
+                          width: 350,
+                          child: BlogPostListItem(
+                            postId: item.postId,
+                            title: item.title,
+                            summary: item.summary,
+                            imageUrl: item.imageUrl,
+                            imageAttribution: item.imageAttribution,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  if (showRecommendedReadsScrollButtons)
+                    Positioned(
+                      top: 0,
+                      bottom: 0,
+                      left: 0,
+                      child: AnimatedOpacity(
+                        opacity: _showRecommendedReadsLeftScrollButton ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 300),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: _showRecommendedReadsLeftScrollButton ? 40.0 : 0.0,
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: GestureDetector(
+                              onTap: _scrollRecommendedReadsLeft,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey.withOpacity(0.5),
+                                ),
+                                padding: EdgeInsets.all(8),
+                                child: Icon(
+                                  Icons.arrow_back_ios,
+                                  color: Colors.black,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (showRecommendedReadsScrollButtons)
+                    Positioned(
+                      top: 0,
+                      bottom: 0,
+                      right: 0,
+                      child: AnimatedOpacity(
+                        opacity: _showRecommendedReadsRightScrollButton ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 300),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: _showRecommendedReadsRightScrollButton ? 40.0 : 0.0,
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: GestureDetector(
+                              onTap: _scrollRecommendedReadsRight,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey.withOpacity(0.5),
+                                ),
+                                padding: EdgeInsets.all(8),
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.black,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-class BlogPostListItem extends StatefulWidget {
+class BlogPostListItem extends StatelessWidget {
   final String postId;
   final String title;
   final String summary;
@@ -161,77 +443,41 @@ class BlogPostListItem extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _BlogPostListItemState createState() => _BlogPostListItemState();
-}
-
-class _BlogPostListItemState extends State<BlogPostListItem> {
-  bool _isHovering = false;
-
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go('/post/${widget.postId}'),
+      onTap: () => context.go('/post/$postId'),
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: Container(
           width: 300,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(15),
-                      topRight: Radius.circular(15),
-                    ),
-                    child: Image.network(
-                      widget.imageUrl,
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    onEnter: (_) => setState(() => _isHovering = true),
-                    onExit: (_) => setState(() => _isHovering = false),
-                    child: AnimatedOpacity(
-                      duration: Duration(milliseconds: 200),
-                      opacity: _isHovering ? 0.6 : 0.0,
-                      child: Container(
-                        width: double.infinity,
-                        height: 200,
-                        color: Colors.black,
-                        child: Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              widget.imageAttribution,
-                              style: const TextStyle(color: Colors.white, shadows: [
-                                Shadow(blurRadius: 10, color: Colors.black)
-                              ]),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
+                ),
+                child: Image.network(
+                  imageUrl,
+                  width: double.infinity, // Updated line
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
+              Container(
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.title,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      title,
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
-                      widget.summary,
-                      style: const TextStyle(fontSize: 16),
+                      summary,
+                      style: TextStyle(fontSize: 16),
                     ),
                   ],
                 ),
@@ -244,47 +490,61 @@ class _BlogPostListItemState extends State<BlogPostListItem> {
   }
 }
 
-class BlogPostScreen extends StatelessWidget {
-  const BlogPostScreen({Key? key, required this.postId}) : super(key: key);
-
+class BlogPostScreen extends StatefulWidget {
   final String postId;
+
+  const BlogPostScreen({
+    Key? key,
+    required this.postId,
+  }) : super(key: key);
+
+  @override
+  _BlogPostScreenState createState() => _BlogPostScreenState();
+}
+
+class _BlogPostScreenState extends State<BlogPostScreen> {
+  late BlogPost _post;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _post = blogPosts[widget.postId]!;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final post = blogPosts[postId] ?? const BlogPost(title: '', content: 'No content available for this post');
     return Scaffold(
       appBar: AppBar(
-        title: Text(post.title),
+        title: const Text('Blog Post'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: PostContent(post: post),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text(
+              _post.title,
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            Text(
+              _post.content,
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class PostContent extends StatelessWidget {
-  final BlogPost post;
+class _ResizeObserver extends WidgetsBindingObserver {
+  final VoidCallback onResize;
 
-  const PostContent({Key? key, required this.post}) : super(key: key);
+  _ResizeObserver({required this.onResize});
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          post.title,
-          style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          post.content,
-          style: const TextStyle(fontSize: 18),
-        ),
-      ],
-    );
+  void didChangeMetrics() {
+    onResize();
   }
 }
