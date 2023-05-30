@@ -53,38 +53,98 @@ class MyApp extends StatelessWidget {
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
+  static const countryNames = [
+    'Austria',
+    'Belgium',
+    'Czechoslovakia',
+    'France',
+    'Germany',
+    'Hungary',
+    'Luxembourg',
+    'Netherlands',
+    'Slovakia',
+  ];
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Travel Stories'),
+        title: const Text('Home Page'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(8),
         children: [
-          // ignore: prefer_const_constructors
-          BlogPostListItem(
-            postId: '1',
-            title: 'Adventure in the Italy',
-            summary: 'A thrilling journey through wine country...',
-            imageUrl: 'assets/italy_unsplash.jpg',
-            imageAttribution: 'Photo by Chris Karidis on Unsplash',
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Explore',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
           ),
-          BlogPostListItem(
-            postId: '2',
-            title: 'Discovering Paris',
-            summary: 'The city of lights has so much to offer...',
-            imageUrl: 'assets/paris_unsplash.jpg',
-            imageAttribution: 'Photo by Mattia Righetti on Unsplash',
+          Container(
+            height: 150,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: countryNames.map((country) {
+                  return Container(
+                    width: 120,
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: Image.network(
+                            'https://raw.githubusercontent.com/MannavaVivek/MannavaVivek.github.io/main/assets/${country.toLowerCase()}_unsplash.jpg',// <- Here
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(country),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
-          // ...add more blog posts here
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Recommended Reads',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Container(
+            height: 350,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                BlogPostListItem(
+                  postId: '1',
+                  title: 'Adventure in Italy',
+                  summary: 'A thrilling journey through wine country...',
+                  imageUrl: 'https://raw.githubusercontent.com/MannavaVivek/MannavaVivek.github.io/main/assets/italy_unsplash.jpg',
+                  imageAttribution: 'Photo by Chris Karidis on Unsplash',
+                ),
+                BlogPostListItem(
+                  postId: '2',
+                  title: 'Discovering Paris',
+                  summary: 'The city of lights has so much to offer...',
+                  imageUrl: 'https://raw.githubusercontent.com/MannavaVivek/MannavaVivek.github.io/main/assets/paris_unsplash.jpg',
+                  imageAttribution: 'Photo by Mattia Righetti on Unsplash',
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class BlogPostListItem extends StatelessWidget {
+class BlogPostListItem extends StatefulWidget {
   final String postId;
   final String title;
   final String summary;
@@ -101,36 +161,83 @@ class BlogPostListItem extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _BlogPostListItemState createState() => _BlogPostListItemState();
+}
+
+class _BlogPostListItemState extends State<BlogPostListItem> {
+  bool _isHovering = false;
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go('/post/$postId'),
+      onTap: () => context.go('/post/${widget.postId}'),
       child: Card(
-        child: Column(
-          children: [
-            Image.network(
-              imageUrl,
-              width: double.infinity,
-              height: 200,
-              fit: BoxFit.cover,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Container(
+          width: 300,
+          child: Column(
+            children: [
+              Stack(
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      topRight: Radius.circular(15),
+                    ),
+                    child: Image.network(
+                      widget.imageUrl,
+                      width: double.infinity,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    summary,
-                    style: const TextStyle(fontSize: 16),
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    onEnter: (_) => setState(() => _isHovering = true),
+                    onExit: (_) => setState(() => _isHovering = false),
+                    child: AnimatedOpacity(
+                      duration: Duration(milliseconds: 200),
+                      opacity: _isHovering ? 0.6 : 0.0,
+                      child: Container(
+                        width: double.infinity,
+                        height: 200,
+                        color: Colors.black,
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              widget.imageAttribution,
+                              style: const TextStyle(color: Colors.white, shadows: [
+                                Shadow(blurRadius: 10, color: Colors.black)
+                              ]),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.summary,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

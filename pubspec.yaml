@@ -62,6 +62,15 @@ flutter:
   assets:
     - assets/paris_unsplash.jpg
     - assets/italy_unsplash.jpg
+    - assets/austria_unsplash.jpg
+    - assets/belgium_unsplash.jpg
+    - assets/czechoslovakia_unsplash.jpg
+    - assets/france_unsplash.jpg
+    - assets/germany_unsplash.jpg
+    - assets/hungary_unsplash.jpg
+    - assets/luxembourg_unsplash.jpg
+    - assets/netherlands_unsplash.jpg
+    - assets/slovakia_unsplash.jpg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
