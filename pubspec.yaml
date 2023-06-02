@@ -91,5 +91,8 @@ flutter:
         - asset: fonts/Nunito-Regular.ttf
         - asset: fonts/Nunito-Bold.ttf
           weight: 700
+    - family: Allura
+      fonts:
+        - asset: fonts/Allura-Regular.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

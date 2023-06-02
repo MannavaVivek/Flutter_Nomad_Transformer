@@ -1,0 +1,32 @@
+ if (_isSearching)
+              Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                  width: MediaQuery.of(context).size.width - 48,
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: EdgeInsets.only(top: kToolbarHeight),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.white,
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search...',
+                      border: InputBorder.none,
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: () {
+                          setState(() {
+                            _isSearching = false;
+                            _selectedIndex = 0;
+                            _searchController.clear();
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),

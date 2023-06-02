@@ -408,5 +408,15 @@ final Map<String, BlogPost> blogPosts = {
     country: 'Italy',
     city: 'Pisa',
   ),
-
+  '36': BlogPost(
+    postId: '36',
+    title: 'Wakanda Forever!',
+    summary: 'Explore Rome, a city that is a living museum of ...',
+    caption: 'Wakanda Forever!',
+    imageUrl: 'assets/images/wakanda_unsplash.jpg',
+    imageAttribution: 'Photo by some random dude on the internet',
+    content: "what else do you want? Vibranium?.",
+    country: 'Forever',
+    city: 'Wakanda',
+  ),
 };
