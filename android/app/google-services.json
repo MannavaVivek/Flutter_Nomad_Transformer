@@ -1,26 +1,36 @@
 {
   "project_info": {
-    "project_number": "432990202758",
-    "project_id": "my-travel-stories-by-ai",
-    "storage_bucket": "my-travel-stories-by-ai.appspot.com"
+    "project_number": "133448987407",
+    "project_id": "nomad-transformer",
+    "storage_bucket": "nomad-transformer.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:432990202758:android:6e0cdedd93cd0e14525a07",
+        "mobilesdk_app_id": "1:133448987407:android:e24a290a7be8434d6ec47a",
         "android_client_info": {
           "package_name": "com.example.my_travel_stories"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "133448987407-svmlncqhdal529715i3ugv46t60hgb8l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAYQZL0qpvnFunBbSwCLKzfq9RRB4TppAU"
+          "current_key": "AIzaSyCLhGGy-kZ5wJWr9rxbmtz_cooTd4Ma4P8"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "133448987407-svmlncqhdal529715i3ugv46t60hgb8l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

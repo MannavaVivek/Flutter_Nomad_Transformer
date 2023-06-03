@@ -5,7 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'blog_post.dart';
 import 'home_screen.dart';
 import 'country_screen.dart';
-import 'search.dart';
+import 'search_screen.dart';
 import 'favorites_screen.dart';
 import 'user_screen.dart';
 

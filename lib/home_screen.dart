@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
 import 'blog_post.dart';
 import 'blog_content.dart';
-import 'search.dart';
+import 'search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
