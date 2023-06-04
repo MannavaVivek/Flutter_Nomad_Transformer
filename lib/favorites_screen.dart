@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
+import 'package:provider/provider.dart';
+import 'user_provider.dart';
 
 class FavoritesScreen extends StatefulWidget {
+  const FavoritesScreen({Key? key}) : super(key: key);
+
   @override
   _FavoritesScreenState createState() => _FavoritesScreenState();
 }
@@ -10,33 +14,22 @@ class FavoritesScreen extends StatefulWidget {
 class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        title: Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.asset(
-              'assets/images/transparent_logo.png',
-              width: 300,
-              height: 150,
-            ),
-          ],
-        ),
-        automaticallyImplyLeading: false,
-      ),
-      body: Center(
-        child: SizedBox(
-          height: 300,
-          width: 300,
-          child: Image.asset(
-            'assets/images/404_error.png',
+    // Use a Consumer to listen to updates from UserProvider
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        // Get the user ID from the UserProvider
+        final userId = userProvider.userId;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Favorites Screen'),
           ),
-        ),
-      ),
-      bottomNavigationBar: Container(
+          body: Center(
+            child: (userId == null || userId.isEmpty)
+                ? Text("No User ID Available")
+                : Text('User ID: $userId'),
+          ),
+          bottomNavigationBar: Container(
         height: 60,
         padding: EdgeInsets.all(12),
         margin: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
@@ -98,9 +91,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     ),
                   ),
                   Container(
-                      height: 2,
-                      width: 34,
-                      color: Colors.white,
+                    height: 2,
+                    width: 34,
+                    color: Colors.white,
                   ),
                 ],
               ),
@@ -125,6 +118,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ],
         ),
       ),
+        );
+      },
     );
   }
 }
+

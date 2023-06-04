@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
+import 'package:provider/provider.dart';
+
 import 'blog_post.dart';
 import 'blog_content.dart';
-import 'search_screen.dart';
+import 'user_provider.dart';
+
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -45,27 +49,43 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent, // Set the background color to transparent
-          elevation: 0, // Remove the elevation
-          centerTitle: true,
-          title: Stack(
-            alignment: Alignment.center,
-            children: [
-              Image.asset(
-                'assets/images/transparent_logo.png', // Replace with the path to your logo image with text
-                width: 300, // Adjust the width as needed
-                height: 150, // Adjust the height as needed
-              ),
-            ],
+        appBar:  PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: Consumer<UserProvider>(
+            builder: (context, userProvider, _) {
+              final userId = userProvider.userId;
+              if (userId != "") {
+                print('userId from homescreen: $userId (${userId.runtimeType}).');
+              } else if (userId == null) {
+                print('userId from homescreen is null.');
+              } else {
+                print('userId from homescreen is empty string.');
+                print("${userProvider.userId}");
+              }
+
+              return AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                centerTitle: true,
+                title: Text(
+                  userId != "" ? 'Hello ${userProvider.userId}' : 'Hello Guest',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black
+                  ),
+                ),
+                automaticallyImplyLeading: false,
+              );
+            },
           ),
-          automaticallyImplyLeading: false,
         ),
         body: Align(
           alignment: Alignment.center,
