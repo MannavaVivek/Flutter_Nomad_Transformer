@@ -4,6 +4,8 @@ import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'user_provider.dart';
 import 'blog_post.dart';
 import 'home_screen.dart';
@@ -11,6 +13,7 @@ import 'country_screen.dart';
 import 'search_screen.dart';
 import 'favorites_screen.dart';
 import 'user_screen.dart';
+import 'hive_service.dart';
 
 
 final _router = GoRouter(
@@ -50,17 +53,16 @@ final _router = GoRouter(
 );
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
-  // Override behavior methods and getters like dragDevices
   @override
   Set<PointerDeviceKind> get dragDevices => {
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
-        // etc.
       };
 }
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await HiveService.initHive();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -72,26 +74,38 @@ void main() async {
     ));
 }
 
-class MyApp extends StatelessWidget {
-  // MyApp({Key? key}) : super(key: key);
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance?.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.detached) {
+      await Hive.close();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp.router(
-          routerConfig: _router,
-          debugShowCheckedModeBanner: false,
-          scrollBehavior: MyCustomScrollBehavior(),
+    return MaterialApp.router(
+      routerConfig: _router,
+      debugShowCheckedModeBanner: false,
+      scrollBehavior: MyCustomScrollBehavior(),
     );
-  }
-}
-
-class _ResizeObserver extends WidgetsBindingObserver {
-  final VoidCallback onResize;
-
-  _ResizeObserver({required this.onResize});
-
-  @override
-  void didChangeMetrics() {
-    onResize();
   }
 }

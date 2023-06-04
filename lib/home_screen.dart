@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'blog_post.dart';
 import 'blog_content.dart';
 import 'user_provider.dart';
+import 'hive_service.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  // override the init
+  void initState() async{
+    await HiveService.initHive();
+  }
 
   static const countryNames = [
     'Austria',
@@ -40,33 +45,16 @@ class HomeScreen extends StatefulWidget {
 
   static const List<String> recommendedPosts = ['1', '2', '3'];
 
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-Future<List<String>> fetchLikedPostIds() async {
-  final userId = Provider.of<UserProvider>(context, listen: false)?.userId;
-  if (userId != null) {
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('user_data_personal')
-        .doc(userId)
-        .collection('posts')
-        .get();
-    final likedPostIds = querySnapshot.docs.map((doc) => doc.id).toList();
-    print('likedPostIds: $likedPostIds');
-    return likedPostIds;
-  } else {
-    return []; // Return an empty list or handle the scenario when userId is null
+  Future<List<String>> fetchLikedPostIdsFromHive() async {
+    final likedPosts = await HiveService.getLikedPosts();
+    return likedPosts;
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-    final userId = userProvider.userId;
-    
+    // final userProvider = Provider.of<UserProvider>(context);
+    // final userId = HiveService.getUserId();
+    initState();
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -160,37 +148,40 @@ Future<List<String>> fetchLikedPostIds() async {
                           children: [
                             for (String postId in HomeScreen.recommendedPosts)
                               FutureBuilder<List<String>>(
-                              future: fetchLikedPostIds(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return CircularProgressIndicator();
-                                } else if (snapshot.hasError) {
-                                  return Text('Error: ${snapshot.error}');
-                                } else {
-                                  final likedPostIds = snapshot.data ?? []; 
-                                  print("===========================================");
-                                  print("Liked post ids: $likedPostIds");
-                                  print("===========================================");
-                                  final isLiked = likedPostIds.contains(postId);
+                                future: fetchLikedPostIdsFromHive(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return CircularProgressIndicator();
+                                  } else if (snapshot.hasError) {
+                                    return Text('Error: ${snapshot.error}');
+                                  } else {
+                                    final likedPostIds = snapshot.data ?? [];
+                                    final isLiked = likedPostIds.contains(postId);
+                                    
+                                    final blogPost = blogPosts[postId];
 
-                                  return Container(
-                                    width: 300,
-                                    height: 300,
-                                    child: BlogPostListItem(
-                                      postId: postId,
-                                      title: blogPosts[postId]!.title,
-                                      summary: blogPosts[postId]!.summary,
-                                      caption: blogPosts[postId]!.caption,
-                                      imageUrl: blogPosts[postId]!.imageUrl,
-                                      imageAttribution: blogPosts[postId]!.imageAttribution,
-                                      country: blogPosts[postId]!.country,
-                                      city: blogPosts[postId]!.city,
-                                      isLiked: isLiked,
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
+                                    if (blogPost == null) {
+                                      print('blogPost with postId: $postId is null');
+                                    }
+
+                                    return Container(
+                                      width: 300,
+                                      height: 300,
+                                      child: BlogPostListItem(
+                                        postId: postId,
+                                        title: blogPost?.title ?? 'Unknown',
+                                        summary: blogPost?.summary ?? 'Unknown',
+                                        caption: blogPost?.caption ?? 'Unknown',
+                                        imageUrl: blogPost?.imageUrl ?? 'Unknown',
+                                        imageAttribution: blogPost?.imageAttribution ?? 'Unknown',
+                                        country: blogPost?.country ?? 'Unknown',
+                                        city: blogPost?.city ?? 'Unknown',
+                                        isLiked: isLiked,
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
                           ],
                         ),
                       ),
@@ -214,9 +205,7 @@ Future<List<String>> fetchLikedPostIds() async {
             children: [
               GestureDetector(
                 onTap: () {
-                  setState(() {
                     // do something here if you wanna go home from home 
-                  });
                 },
                 child: Column(
                   children: [
@@ -255,9 +244,7 @@ Future<List<String>> fetchLikedPostIds() async {
               ),
               GestureDetector(
                 onTap: () {
-                  setState(() {
                     context.push('/favorites');
-                  });
                 },
                 child: Column(
                   children: [
@@ -274,9 +261,7 @@ Future<List<String>> fetchLikedPostIds() async {
               ),
               GestureDetector(
                 onTap: () {
-                  setState(() {
-                    context.push('/user');
-                  });
+                  context.push('/user');
                 },
                 child: Column(
                   children: [

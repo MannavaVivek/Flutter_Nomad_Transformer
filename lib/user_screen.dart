@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'user_provider.dart';
+import 'hive_service.dart';
 
 class UserScreen extends StatefulWidget {
   @override
@@ -18,16 +19,29 @@ class _UserScreenState extends State<UserScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   User? _user;
   String _username = '';
+  String _quote = "Do I wake up every morning and ask you for Coffee Coffee Cream Cream?";
 
   @override
   void initState() {
     super.initState();
     _initializeFirebase();
-    _getCurrentUser();
+    _loadUserData();
   }
 
   Future<void> _initializeFirebase() async {
     await Firebase.initializeApp();
+  }
+
+  Future<void> _loadUserData() async {
+    await HiveService.initHive();
+    final userId = HiveService.getUserId();
+    if (userId.isNotEmpty) {
+      setState(() {
+        _user = _auth.currentUser;
+        _username = HiveService.getUsername();
+        _quote = HiveService.getQuote();
+      });
+    }
   }
 
   Future<void> _getCurrentUser() async {
@@ -44,8 +58,19 @@ class _UserScreenState extends State<UserScreen> {
       if (userData.exists) {
         setState(() {
           _username = userData['username'];
+          _quote = userData['quote'];
+
         });
+        HiveService.setUsername(_username);
+        HiveService.setQuote(_quote);
       }
+      final querySnapshot = await FirebaseFirestore.instance
+        .collection('user_data_personal')
+        .doc(currentUser.uid)
+        .collection('posts')
+        .get();
+      final likedPostIds = querySnapshot.docs.map((doc) => doc.id).toList();
+      HiveService.setLikedPosts(likedPostIds);
     }
   }
 
@@ -321,6 +346,7 @@ class _UserScreenState extends State<UserScreen> {
       setState(() {
         _user = null;
       });
+      context.pushReplacement('/user');
       print('Signed out successfully');
       Provider.of<UserProvider>(context, listen: false).setUser(null);
     } catch (e) {
@@ -402,32 +428,10 @@ class _UserScreenState extends State<UserScreen> {
                     SizedBox(height: 10),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: _user != null
-                          ? StreamBuilder<DocumentSnapshot>(
-                              stream: FirebaseFirestore.instance
-                                  .collection('user_data_personal')
-                                  .doc(_user!.uid)
-                                  .snapshots(),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasError) {
-                                  return Text(
-                                    'Error: ${snapshot.error}',
-                                    style: TextStyle(fontSize: 18),
-                                  );
-                                }
-
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return CircularProgressIndicator();
-                                }
-
-                                String quote =
-                                    snapshot.data?.get('quote') ?? '';
-                                return Text(
-                                  quote.isNotEmpty ? quote : 'Default Quote',
-                                  style: GoogleFonts.satisfy(fontSize: 18),
-                                );
-                              },
+                      child: _quote.isNotEmpty
+                          ? Text(
+                              _quote,
+                              style: GoogleFonts.satisfy(fontSize: 18),
                             )
                           : Text(
                               "Do I wake up every morning and ask you for Coffee Coffee Cream Cream?",

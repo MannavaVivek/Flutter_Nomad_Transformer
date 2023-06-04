@@ -131,7 +131,7 @@ class _BlogPostScreenState extends State<BlogPostScreen> {
     super.didChangeDependencies();
     // Wait for the widget rendering to complete and then scroll
     if (MediaQuery.of(context).size.height > 800) {
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(Duration.zero, () {
           _scrollController.jumpTo(1100);
         });
