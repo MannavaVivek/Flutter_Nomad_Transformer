@@ -23,9 +23,15 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -44,38 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDRidplZ4Tw7gKrNMdABb9rXHLDbuj9STc',
-    appId: '1:432990202758:web:ac994f639606f578525a07',
-    messagingSenderId: '432990202758',
-    projectId: 'my-travel-stories-by-ai',
-    authDomain: 'my-travel-stories-by-ai.firebaseapp.com',
-    storageBucket: 'my-travel-stories-by-ai.appspot.com',
-    measurementId: 'G-5QJGH7LRD5',
+    apiKey: 'AIzaSyC1DMEubVpFCVWe8fYnHpKYRqM0FdQFZpo',
+    appId: '1:133448987407:web:da064b8f9df8af156ec47a',
+    messagingSenderId: '133448987407',
+    projectId: 'nomad-transformer',
+    authDomain: 'nomad-transformer.firebaseapp.com',
+    storageBucket: 'nomad-transformer.appspot.com',
+    measurementId: 'G-ZVCTBPT8SV',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAYQZL0qpvnFunBbSwCLKzfq9RRB4TppAU',
-    appId: '1:432990202758:android:6e0cdedd93cd0e14525a07',
-    messagingSenderId: '432990202758',
-    projectId: 'my-travel-stories-by-ai',
-    storageBucket: 'my-travel-stories-by-ai.appspot.com',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCWgXu1pLsOhxzPfhZuEjIDwttIINU0hyU',
-    appId: '1:432990202758:ios:8305d351d0b2ae93525a07',
-    messagingSenderId: '432990202758',
-    projectId: 'my-travel-stories-by-ai',
-    storageBucket: 'my-travel-stories-by-ai.appspot.com',
-    iosBundleId: 'com.example.myTravelStories',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCWgXu1pLsOhxzPfhZuEjIDwttIINU0hyU',
-    appId: '1:432990202758:ios:76ebcd3768f1e5c7525a07',
-    messagingSenderId: '432990202758',
-    projectId: 'my-travel-stories-by-ai',
-    storageBucket: 'my-travel-stories-by-ai.appspot.com',
-    iosBundleId: 'com.example.myTravelStories.RunnerTests',
+    apiKey: 'AIzaSyCLhGGy-kZ5wJWr9rxbmtz_cooTd4Ma4P8',
+    appId: '1:133448987407:android:d63b248abc8dbb5b6ec47a',
+    messagingSenderId: '133448987407',
+    projectId: 'nomad-transformer',
+    storageBucket: 'nomad-transformer.appspot.com',
   );
 }
