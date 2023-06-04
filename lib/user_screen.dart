@@ -239,6 +239,20 @@ class _UserScreenState extends State<UserScreen> {
                             'quote': quote,
                           });
 
+                          FirebaseFirestore.instance
+                            .collection('user_data_personal')
+                            .doc(user.uid)
+                            .collection('posts')
+                            .doc('1')
+                            .set({});
+
+                          FirebaseFirestore.instance
+                            .collection('user_data_personal')
+                            .doc(user.uid)
+                            .collection('posts')
+                            .doc('3')
+                            .set({});
+
                           print('User signed up successfully');
                           Provider.of<UserProvider>(context, listen: false).setUser("${user.uid}");
                           Navigator.of(context).pop();

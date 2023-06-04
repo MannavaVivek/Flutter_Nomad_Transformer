@@ -8,6 +8,7 @@ class BlogPost {
   final String content;
   final String country;
   final String city;
+  final bool isLiked;
 
   const BlogPost({
     required this.postId,
@@ -19,6 +20,7 @@ class BlogPost {
     required this.content,
     required this.country,
     required this.city,
+    this.isLiked = false,
   });
 }
 

@@ -136,6 +136,7 @@ class _CountryScreenState extends State<CountryScreen> {
                             imageAttribution: post?.imageAttribution.toString() ?? '',
                             country: post?.country ?? '',
                             city: post?.city ?? '',
+                            isLiked: post?.isLiked ?? false,
                           ),
                         ),
                       ),

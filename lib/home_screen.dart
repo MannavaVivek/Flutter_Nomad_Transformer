@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'blog_post.dart';
 import 'blog_content.dart';
 import 'user_provider.dart';
-
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -45,47 +45,45 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-  @override
-  void initState() {
-    super.initState();
-
+Future<List<String>> fetchLikedPostIds() async {
+  final userId = Provider.of<UserProvider>(context, listen: false)?.userId;
+  if (userId != null) {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('user_data_personal')
+        .doc(userId)
+        .collection('posts')
+        .get();
+    final likedPostIds = querySnapshot.docs.map((doc) => doc.id).toList();
+    print('likedPostIds: $likedPostIds');
+    return likedPostIds;
+  } else {
+    return []; // Return an empty list or handle the scenario when userId is null
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final userId = userProvider.userId;
+    
     return SafeArea(
       child: Scaffold(
-        appBar:  PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: Consumer<UserProvider>(
-            builder: (context, userProvider, _) {
-              final userId = userProvider.userId;
-              if (userId != "") {
-                print('userId from homescreen: $userId (${userId.runtimeType}).');
-              } else if (userId == null) {
-                print('userId from homescreen is null.');
-              } else {
-                print('userId from homescreen is empty string.');
-                print("${userProvider.userId}");
-              }
-
-              return AppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                centerTitle: true,
-                title: Text(
-                  userId != "" ? 'Hello ${userProvider.userId}' : 'Hello Guest',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black
-                  ),
-                ),
-                automaticallyImplyLeading: false,
-              );
-            },
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          title: Stack(
+            alignment: Alignment.center,
+            children: [
+              Image.asset(
+                'assets/images/transparent_logo.png',
+                width: 300,
+                height: 150,
+              ),
+            ],
           ),
+          automaticallyImplyLeading: false,
         ),
         body: Align(
           alignment: Alignment.center,
@@ -161,20 +159,38 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Row(
                           children: [
                             for (String postId in HomeScreen.recommendedPosts)
-                              Container(
-                                width: 300,
-                                height: 300,
-                                child: BlogPostListItem(
-                                  postId: postId,
-                                  title: blogPosts[postId]!.title,
-                                  summary: blogPosts[postId]!.summary,
-                                  caption: blogPosts[postId]!.caption,
-                                  imageUrl: blogPosts[postId]!.imageUrl,
-                                  imageAttribution: blogPosts[postId]!.imageAttribution,
-                                  country: blogPosts[postId]!.country,
-                                  city: blogPosts[postId]!.city,
-                                ),
-                              ),
+                              FutureBuilder<List<String>>(
+                              future: fetchLikedPostIds(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                } else {
+                                  final likedPostIds = snapshot.data ?? []; 
+                                  print("===========================================");
+                                  print("Liked post ids: $likedPostIds");
+                                  print("===========================================");
+                                  final isLiked = likedPostIds.contains(postId);
+
+                                  return Container(
+                                    width: 300,
+                                    height: 300,
+                                    child: BlogPostListItem(
+                                      postId: postId,
+                                      title: blogPosts[postId]!.title,
+                                      summary: blogPosts[postId]!.summary,
+                                      caption: blogPosts[postId]!.caption,
+                                      imageUrl: blogPosts[postId]!.imageUrl,
+                                      imageAttribution: blogPosts[postId]!.imageAttribution,
+                                      country: blogPosts[postId]!.country,
+                                      city: blogPosts[postId]!.city,
+                                      isLiked: isLiked,
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
                           ],
                         ),
                       ),

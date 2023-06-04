@@ -19,6 +19,7 @@ class BlogPostListItem extends StatelessWidget {
   final String imageAttribution;
   final String country;
   final String city;
+  final bool isLiked; // New parameter for tracking if the post is liked
 
   const BlogPostListItem({
     Key? key,
@@ -30,6 +31,7 @@ class BlogPostListItem extends StatelessWidget {
     required this.imageAttribution,
     required this.country,
     required this.city,
+    this.isLiked = false, // Include the new parameter
   }) : super(key: key);
 
   @override
@@ -46,11 +48,24 @@ class BlogPostListItem extends StatelessWidget {
                 topLeft: Radius.circular(15),
                 topRight: Radius.circular(15),
               ),
-              child: Image.asset(
-                imageUrl,
-                width: double.infinity,
-                height: 180, // Adjust the height as needed
-                fit: BoxFit.cover,
+              child: Stack(
+                children: [
+                  Image.asset(
+                    imageUrl,
+                    width: double.infinity,
+                    height: 180,
+                    fit: BoxFit.cover,
+                  ),
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Icon(
+                      isLiked ? Icons.favorite : Icons.favorite_border,
+                      color: isLiked ? Colors.red : Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ],
               ),
             ),
             Padding(
