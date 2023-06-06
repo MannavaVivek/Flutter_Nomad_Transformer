@@ -413,7 +413,7 @@ final Map<String, BlogPost> blogPosts = {
   '36': BlogPost(
     postId: '36',
     title: 'Wakanda Forever!',
-    summary: 'Explore Rome, a city that is a living museum of ...',
+    summary: 'Pride, Honor, Privilege...',
     caption: 'Wakanda Forever!',
     imageUrl: 'assets/images/wakanda_unsplash.jpg',
     imageAttribution: 'Photo by some random dude on the internet',

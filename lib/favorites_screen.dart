@@ -47,7 +47,20 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text('Favorites Screen'),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            centerTitle: false,
+            titleSpacing: 8,
+            title: Align(
+              alignment: Alignment.center,
+              child: Text('Favorites Screen',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  )),
+            ),
+            automaticallyImplyLeading: false,
           ),
           body: Center(
             child: (likedPosts.isEmpty)
