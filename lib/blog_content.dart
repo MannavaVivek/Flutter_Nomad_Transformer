@@ -171,7 +171,7 @@ final Map<String, BlogPost> blogPosts = {
   '14': BlogPost(
     postId: '14',
     title: 'Heidelberg: The Romantic City',
-    summary: 'Discover Heidelberg, a romantic city renowned for its historic old town and prestigious university ...',
+    summary: 'Discover Heidelberg, a romantic city renowned for ...',
     caption: 'Heidelberg, where academia and a vibrant old town create a romantic backdrop.',
     imageUrl: 'assets/images/heidelberg_unsplash.jpg',
     imageAttribution: 'Photo by Mateo Krössler on Unsplash',

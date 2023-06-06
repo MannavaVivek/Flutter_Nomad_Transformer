@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'blog_post.dart';
 import 'package:rive/rive.dart';
 import 'blog_content.dart';
+import 'hive_service.dart';
 
 class CountryScreen extends StatefulWidget {
   final String countryName;
@@ -42,8 +43,13 @@ class _CountryScreenState extends State<CountryScreen> {
     super.dispose();
   }
 
-  void navigateToBlogPost(String postId) {
-    GoRouter.of(context).push('/country/${widget.countryName}/blog/$postId');
+  void navigateToBlogPost(String postId) async {
+    GoRouter.of(context).push('/post/$postId').then((value) => (() {}));
+  }
+
+  Future<List<String>> fetchLikedPostIdsFromHive() async {
+      final likedPosts = await HiveService.getLikedPosts();
+      return likedPosts;
   }
 
   @override
@@ -120,27 +126,42 @@ class _CountryScreenState extends State<CountryScreen> {
                   itemBuilder: (context, index) {
                     final postId = _isExpanded ? filteredPosts[index] : blogPostsForCountry[index].postId;
                     final post = blogPosts[postId];
-                    return AspectRatio(
-                      aspectRatio: 1,
-                      child: GestureDetector(
-                        onTap: () => navigateToBlogPost(postId),
-                        child: Container(
-                          width: 300,
-                          height: 300,
-                          child: BlogPostListItem(
-                            postId: post?.postId ?? '',
-                            title: post?.title ?? '',
-                            summary: post?.summary ?? '',
-                            caption: post?.caption ?? '',
-                            imageUrl: post?.imageUrl ?? '',
-                            imageAttribution: post?.imageAttribution.toString() ?? '',
-                            country: post?.country ?? '',
-                            city: post?.city ?? '',
-                            isLiked: post?.isLiked ?? false,
-                          ),
-                        ),
-                      ),
-                    );
+                    return FutureBuilder<List<String>>(
+                              future: fetchLikedPostIdsFromHive(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                } else {
+                                  final likedPostIds = snapshot.data ?? [];
+                                  final isLiked = likedPostIds.contains(postId);
+
+                                  return AspectRatio(
+                                    aspectRatio: 1,
+                                    child: GestureDetector(
+                                      onTap: () => navigateToBlogPost(postId),
+                                      child: Container(
+                                        width: 300,
+                                        height: 300,
+                                        child: BlogPostListItemCountry(
+                                          postId: post?.postId ?? '',
+                                          title: post?.title ?? '',
+                                          summary: post?.summary ?? '',
+                                          caption: post?.caption ?? '',
+                                          imageUrl: post?.imageUrl ?? '',
+                                          imageAttribution: post?.imageAttribution.toString() ?? '',
+                                          country: post?.country ?? '',
+                                          city: post?.city ?? '',
+                                          isLiked: isLiked,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            );
+                    
                   },
                 ),
               ],
@@ -162,7 +183,7 @@ class _CountryScreenState extends State<CountryScreen> {
             GestureDetector(
               onTap: () {
                 setState(() {
-                  context.push('/');
+                  context.go('/');
                 });
               },
               child: Column(
@@ -242,25 +263,25 @@ class _CountryScreenState extends State<CountryScreen> {
   String getCountryContent(String countryName) {
     switch (countryName) {
       case 'austria':
-        return "Austria, the landlocked gem of Central Europe, radiates with its imperial history and rugged alpine terrain. The birthplace of Mozart, the country harmoniously blends its rich culture with magnificent landscapes. From the romantic streets of Vienna, the stunning beauty of the Salzkammergut lake region, to the snow-capped peaks of Tyrol, Austria invites its visitors to immerse themselves in a majestic symphony of culture, history, and nature. Don't miss the chance to indulge in Austria's delectable cuisine with its world-renowned pastries and comforting hearty dishes.";
+        return "Austria, the landlocked gem of Central Europe, radiates with its imperial history and rugged alpine terrain. The birthplace of Mozart, the country harmoniously blends its rich culture with magnificent landscapes. From the romantic streets of Vienna, the stunning beauty of the Salzkammergut lake region";
       case 'belgium':
-        return "Belgium, a small country with a big heart, is a place where Medieval meets Modern. With an intoxicating mix of picturesque landscapes, rich history, and distinctive culinary traditions, Belgium offers an unforgettable experience. The cobblestone streets of Bruges, the vibrant heart of Brussels, and the historic charms of Antwerp allure travelers from across the globe. Known worldwide for its superb chocolates, waffles, and beers, Belgium is also a gastronomic paradise. Explore the diversity and richness of Belgium, a country that effortlessly blends old and new.";
+        return "Belgium, a small country with a big heart, is a place where Medieval meets Modern. With an intoxicating mix of picturesque landscapes, rich history, and distinctive culinary traditions, Belgium offers an unforgettable experience. The cobblestone streets of Bruges, the vibrant heart of Brussels, and the historic charms of Antwerp allure travelers from across the globe. Known worldwide for its superb chocolates, waffles, and beers, Belgium is also a gastronomic paradise";
       case 'czechrepublic':
-        return "The Czech Republic, heart of Central Europe, is a treasure trove of culture, history, and stunning architecture. This country, where the east meets west, enchants you with its fairy-tale castles, ancient squares, and intriguing folklore. The charm of Prague's ancient bridges and spires, the Moravian vineyards, and the remarkable landscapes of Bohemian Switzerland capture the imagination of every visitor. Czech cuisine, with its hearty stews and world-renowned beer, provides a culinary journey that complements the country's rich cultural exploration.";
+        return "The Czech Republic, heart of Central Europe, is a treasure trove of culture, history, and stunning architecture. This country, where the east meets west, enchants you with its fairy-tale castles, ancient squares, and intriguing folklore. The charm of Prague's ancient bridges and spires, the Moravian vineyards, and the remarkable landscapes of Bohemian Switzerland capture the imagination of every visitor";
       case 'france':
-        return "France, synonymous with romance and sophistication, has been a cultural beacon for centuries. From the chic boulevards of Paris, the charm of Provencal countryside, to the glamorous French Riviera, France offers an immersive experience in art, history, and gastronomy. Home to some of the world's most acclaimed wines, cheeses, and patisseries, French cuisine is a sensory delight. France invites you to step into a world of refined culture, unparalleled culinary adventures, and experiences steeped in history and tradition.";
+        return "France, synonymous with romance and sophistication, has been a cultural beacon for centuries. From the chic boulevards of Paris, the charm of Provencal countryside, to the glamorous French Riviera, France offers an immersive experience in art, history, and gastronomy. Home to some of the world's most acclaimed wines, cheeses, and patisseries, French cuisine is a sensory delight";
       case 'germany':
-        return "Germany, a powerhouse of Europe, is a harmonious blend of timeless tradition and forward-thinking innovation. This country is known for its lush landscapes, from the stunning Bavarian Alps, the picturesque Black Forest, to the enchanting Rhine Valley. Germany's cities, like the vibrant capital Berlin, historic Munich, and enchanting Heidelberg, offer a journey through time from medieval architecture to modern art and culture. Germany also holds high esteem for its culinary delights, including diverse breads, sausages, and, of course, its world-famous beers. Explore the breadth and depth of Germany, a country where history and progress coexist.";
+        return "Germany, a powerhouse of Europe, is a harmonious blend of timeless tradition and forward-thinking innovation. This country is known for its lush landscapes, from the stunning Bavarian Alps, the picturesque Black Forest, to the enchanting Rhine Valley. Germany's cities, like the vibrant capital Berlin, historic Munich, and enchanting Heidelberg, offer a journey through time from medieval architecture to modern art and culture";
       case 'hungary':
-        return "Hungary, the land of Magyars, mesmerizes visitors with its unique blend of Eastern and Western cultures. From the enchanting streets of Budapest, known as the 'Paris of the East', the pristine Lake Balaton, to the historic wine region of Eger, Hungary is full of fascinating surprises. Experience the rejuvenating thermal baths, delve into the flavorsome Hungarian cuisine with its spicy goulash and mouth-watering pastries, and immerse yourself in the country's profound history and vibrant folklore. Hungary invites you to uncover its magical charm and mystique.";
+        return "Hungary, the land of Magyars, mesmerizes visitors with its unique blend of Eastern and Western cultures. From the enchanting streets of Budapest, known as the 'Paris of the East', the pristine Lake Balaton, to the historic wine region of Eger, Hungary is full of fascinating surprises. Experience the rejuvenating thermal baths, delve into the flavorsome Hungarian cuisine with its spicy goulash and mouth-watering pastries, and immerse yourself in the country's profound history and vibrant folklore";
       case 'luxembourg':
-        return "Luxembourg, one of Europe's smallest nations, holds grand surprises in its green heart. This multilingual country brims with castles, forests, and picturesque villages, with the cosmopolitan capital city offering a contrast with its blend of modern and medieval architecture. From the rugged beauty of the Ardennes, the sun-drenched vineyards of the Moselle, to the unique rock formations of Mullerthal, Luxembourg captures the imagination. The country's refined cuisine, influenced by its neighbors, completes the enriching Luxembourgish experience. Discover the hidden delights of Luxembourg, a country that effortlessly balances rural tranquility with urban sophistication.";
+        return "Luxembourg, one of Europe's smallest nations, holds grand surprises in its green heart. This multilingual country brims with castles, forests, and picturesque villages, with the cosmopolitan capital city offering a contrast with its blend of modern and medieval architecture. From the rugged beauty of the Ardennes, the sun-drenched vineyards of the Moselle, to the unique rock formations of Mullerthal, Luxembourg captures the imagination";
       case 'netherlands':
-        return "The Netherlands, often known as Holland, is a country that captivates with its ingenious mix of tradition and innovation. Famous for its iconic windmills, colorful tulip fields, and charming canals, the country showcases its bond with nature in every corner. From the artistic heritage of Amsterdam, the historic university city of Utrecht, to the modern architecture of Rotterdam, the Netherlands offers diverse experiences. With Dutch cheeses, herring, and pancakes as culinary highlights, the country promises a delightful gastronomic journey. The Netherlands invites you to experience its laid-back charm and inventive spirit.";
+        return "The Netherlands, often known as Holland, is a country that captivates with its ingenious mix of tradition and innovation. Famous for its iconic windmills, colorful tulip fields, and charming canals, the country showcases its bond with nature in every corner. From the artistic heritage of Amsterdam, the historic university city of Utrecht, to the modern architecture of Rotterdam, the Netherlands offers diverse experiences";
       case 'slovakia':
-        return "Slovakia, tucked away in the heart of Europe, is a hidden gem with rich natural beauty and fascinating history. From the majestic peaks of High Tatras, the ancient castles dotting the landscape, to the charming old town of Bratislava, Slovakia is a haven for nature and history lovers alike. Slovak cuisine, with its comforting soups, hearty dumplings, and delicious pastries, adds to the country's allure. Whether you're exploring the rustic countryside or delving into the vibrant city life, Slovakia offers an unforgettable adventure.";
+        return "Slovakia, tucked away in the heart of Europe, is a hidden gem with rich natural beauty and fascinating history. From the majestic peaks of High Tatras, the ancient castles dotting the landscape, to the charming old town of Bratislava, Slovakia is a haven for nature and history lovers alike. Slovak cuisine, with its comforting soups, hearty dumplings, and delicious pastries, adds to the country's allure";
       case 'italy':
-        return "Italy, a land of unparalleled beauty, is a symphony of stunning landscapes, rich history, and profound culture. Known as the birthplace of the Renaissance, Italy boasts numerous works of art and architecture that take your breath away. Its cities bustle with life and color, each with its own distinct character and charm. From the romantic canals of Venice, the majestic Colosseum of Rome, to the scenic vineyards of Tuscany, Italy beckons travelers with its irresistible allure. The country's rich gastronomy, marked by world-renowned wines, freshly baked bread, delectable cheeses, and pizzas, makes for a culinary adventure in its own right. Experience the Italian 'la dolce vita' and explore the many facets of this captivating country.";
+        return "Italy, a land of unparalleled beauty, is a symphony of stunning landscapes, rich history, and profound culture. Known as the birthplace of the Renaissance, Italy boasts numerous works of art and architecture that take your breath away. Its cities bustle with life and color, each with its own distinct character and charm. From the romantic canals of Venice, the majestic Colosseum of Rome, to the scenic vineyards of Tuscany, Italy beckons travelers with its irresistible allure";
       default:
         return "No content available for " + countryName;
     }

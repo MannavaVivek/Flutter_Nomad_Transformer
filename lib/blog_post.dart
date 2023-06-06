@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'blog_content.dart';
-import 'package:rive/rive.dart';
+import 'package:rive/rive.dart' hide LinearGradient;
 import 'food_rec.dart';
+import 'hive_service.dart';
+import 'user_provider.dart';
+import 'package:provider/provider.dart';
 
 List<BlogPost> getBlogPostsForCountry(String country) {
   return blogPosts.values
@@ -10,7 +14,7 @@ List<BlogPost> getBlogPostsForCountry(String country) {
       .toList();
 }
 
-class BlogPostListItem extends StatelessWidget {
+class BlogPostListItemCountry extends StatelessWidget {
   final String postId;
   final String title;
   final String summary;
@@ -21,7 +25,95 @@ class BlogPostListItem extends StatelessWidget {
   final String city;
   final bool isLiked; // New parameter for tracking if the post is liked
 
-  const BlogPostListItem({
+  const BlogPostListItemCountry({
+    Key? key,
+    required this.postId,
+    required this.title,
+    required this.summary,
+    required this.caption,
+    required this.imageUrl,
+    required this.imageAttribution,
+    required this.country,
+    required this.city,
+    this.isLiked = false, // Include the new parameter
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
+            ),
+            child: Stack(
+              children: [
+                Image.asset(
+                  imageUrl,
+                  width: double.infinity,
+                  height: 180,
+                  fit: BoxFit.cover,
+                ),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Icon(
+                    isLiked ? Icons.favorite : Icons.favorite_border,
+                    color: isLiked ? Colors.red : Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Courgette',
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  summary,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'Nunito',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+class BlogPostListItemHome extends StatelessWidget {
+  final String postId;
+  final String title;
+  final String summary;
+  final String caption;
+  final String imageUrl;
+  final String imageAttribution;
+  final String country;
+  final String city;
+  final bool isLiked; // New parameter for tracking if the post is liked
+
+  const BlogPostListItemHome({
     Key? key,
     required this.postId,
     required this.title,
@@ -40,63 +132,79 @@ class BlogPostListItem extends StatelessWidget {
       onTap: () => context.push('/post/$postId'),
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15),
+        child: Container(
+          height: 200,
+          child: Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Image.asset(
+                  imageUrl,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
-              child: Stack(
-                children: [
-                  Image.asset(
-                    imageUrl,
-                    width: double.infinity,
-                    height: 180,
-                    fit: BoxFit.cover,
-                  ),
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Icon(
-                      isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: isLiked ? Colors.red : Colors.white,
-                      size: 24,
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Icon(
+                  isLiked ? Icons.favorite : Icons.favorite_border,
+                  color: isLiked ? Colors.red : Colors.white,
+                  size: 24,
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(15),
+                      bottomRight: Radius.circular(15),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.8),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Courgette',
-                    ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Courgette',
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        summary,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Nunito',
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    summary,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Nunito',
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+
 }
 
 class BlogPostScreen extends StatefulWidget {
@@ -117,6 +225,9 @@ class _BlogPostScreenState extends State<BlogPostScreen> {
   late ScrollController _scrollController;
   late PageController _pageController;
   int _currentPageIndex = 0;
+  bool _isLiked = false;
+  final List<String> likedPostIds = HiveService.getLikedPosts();
+  final String userId = HiveService.getUserId();
 
   @override
   void initState() {
@@ -124,6 +235,8 @@ class _BlogPostScreenState extends State<BlogPostScreen> {
     _post = blogPosts[widget.postId]!;
     _scrollController = ScrollController();
     _pageController = PageController();
+    // connect to the hive class
+    _checkLikedStatus(); // Check if the post is liked by the user
   }
 
   @override
@@ -144,6 +257,37 @@ class _BlogPostScreenState extends State<BlogPostScreen> {
     _scrollController.dispose();
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _checkLikedStatus() {
+    _isLiked = likedPostIds.contains(widget.postId); // Check if the current post ID is in the liked posts
+  }
+
+  void _toggleLikedStatus() async{
+
+  if (userId.isEmpty) {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('You must be logged in to like posts'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+    context.push('/user');
+  } else {
+    setState(() {
+      _isLiked = !_isLiked;
+    });
+    // update the liked posts list using provider
+    Provider.of<UserProvider>(context, listen: false).setLikedStatus(widget.postId, _isLiked);
+    }
   }
 
   @override
@@ -364,6 +508,38 @@ class _BlogPostScreenState extends State<BlogPostScreen> {
               ),
             ),
           ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _toggleLikedStatus(); // Toggle the liked status
+          if(userId.isNotEmpty) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text(_isLiked ? 'Liked' : 'Removed from Favorites'),
+                  content: Text(
+                    _isLiked
+                        ? 'You have liked this post.'
+                        : 'You have removed this post from favorites.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('OK'),
+                    ),
+                  ],
+                );
+              },
+            );
+          };
+        },
+        child: Icon(
+          _isLiked ? Icons.favorite : Icons.favorite_border,
+          color: _isLiked ? Colors.red : Colors.white,
         ),
       ),
     );
