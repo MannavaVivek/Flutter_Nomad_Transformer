@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'user_provider.dart';
 import 'blog_post.dart';
 import 'blog_content.dart';
@@ -41,6 +42,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       builder: (context, userProvider, child) {
         // Listen to changes in likedPostIds
         final likedPostIds = HiveService.getLikedPosts();
+        final userId = HiveService.getUserId();
 
         // Update the likedPosts when likedPostIds change
         likedPosts = blogPosts.values.where((post) => likedPostIds.contains(post.postId)).toList();
@@ -55,7 +57,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               alignment: Alignment.center,
               child: Text('Favorites Screen',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: Color.fromARGB(214, 62, 117, 219),
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   )),
@@ -64,7 +66,44 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
           body: Center(
             child: (likedPosts.isEmpty)
-                ? Text("You haven't liked any blog posts yet.")
+                ? Column(
+                    children: [
+                      SizedBox(
+                        height: 300,
+                        width: 300,
+                        child: const RiveAnimation.asset(
+                          'assets/RiveAssets/cat_no_results_found.riv',
+                          stateMachines: ['State Machine 1'],
+                        ),
+                      ),
+                      if (userId == 'Guest' || userId == '')
+                        SizedBox(
+                          width: 250,
+                          child: Text(
+                            "Oops! Looks like you haven't logged in yet. Remember, every journey starts with a single step, and yours starts with logging in!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Color.fromARGB(181, 106, 133, 184),
+                              fontSize: 16.0,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        )
+                      else if (likedPosts.isEmpty)
+                        SizedBox(
+                          width: 250,
+                          child: Text(
+                            "Hmm, your list of liked posts seems to be taking a break. No worries though! Take a stroll through our blog and discover some amazing content to light up this space.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Color.fromARGB(181, 106, 133, 184),
+                              fontSize: 16.0,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                    ],
+                  )
                 : ListView.builder(
                     itemCount: likedPosts.length,
                     itemBuilder: (context, index) {
@@ -113,6 +152,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         child: RiveAnimation.asset(
                           'assets/RiveAssets/icons.riv',
                           artboard: "HOME",
+                          stateMachines: ['State Machine 1'],
                         ),
                       ),
                     ],

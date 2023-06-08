@@ -14,7 +14,7 @@ import 'search_screen.dart';
 import 'favorites_screen.dart';
 import 'user_screen.dart';
 import 'hive_service.dart';
-import 'login_screen.dart';
+import 'signin_screen.dart';
 import 'register_screen.dart';
 
 
@@ -50,8 +50,8 @@ final _router = GoRouter(
           builder: (context, state) => UserScreen(),
         ),
         GoRoute(
-          path: 'login', 
-          builder: (context, state) => LoginScreen(),
+          path: 'signin', 
+          builder: (context, state) => SigninScreen(),
         ),
         GoRoute(
           path: 'register', 

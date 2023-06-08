@@ -75,7 +75,7 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   void _signIn() async {
-    GoRouter.of(context).push('/login');
+    GoRouter.of(context).push('/signin');
   }
 
   void _signOut() async {

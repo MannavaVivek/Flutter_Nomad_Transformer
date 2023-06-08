@@ -8,41 +8,36 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'hive_service.dart';
 import 'user_provider.dart';
 
-class RegisterScreen extends StatelessWidget {
+class SigninScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController confirmPassController = TextEditingController();
-  final TextEditingController quoteController = TextEditingController();
   final GoogleSignIn googleSignIn = GoogleSignIn();
-  
-  final _formKey = GlobalKey<FormState>();
 
-  Future<UserCredential?> registerWithFirebase(BuildContext context) async {
+  String _username = '';
+  String _quote = "Do I wake up every morning and ask you for Coffee Coffee Cream Cream?";
+
+  final _formKey = GlobalKey<FormState>();
+  
+  Future<UserCredential?> signInWithFirebase(BuildContext context) async {
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
         password: passwordController.text
       );
-
-      await FirebaseFirestore.instance.collection('user_data_personal').doc(userCredential.user?.uid).set({
-        'username': usernameController.text,
-        'quote': quoteController.text,
-      });
-
+      
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
+      if (e.code == 'user-not-found') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('The account already exists for that email.'),
+            content: Text('No user found for that email.'),
             backgroundColor: Colors.red,
           ),
         );
-      } else if (e.code == 'weak-password') {
+      } else if (e.code == 'wrong-password') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('The password provided is too weak.'),
+            content: Text('Wrong password provided for that user.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -54,19 +49,33 @@ class RegisterScreen extends StatelessWidget {
     return null;
   }
 
-  Future<void> _setUserDataToHive(BuildContext context,  String username, String quote) async {
+  Future<void> _getCurrentUser(BuildContext context) async {
     final User? currentUser = FirebaseAuth.instance.currentUser;
-    print("Current user: ${currentUser?.uid}");
-    Provider.of<UserProvider>(context, listen: false).setUser("${currentUser?.uid}");
-    HiveService.setUsername(username);
-    HiveService.setQuote(quote);
-    HiveService.setLikedPosts([]);
+    if (currentUser != null) {
+      Provider.of<UserProvider>(context, listen: false).setUser("${currentUser.uid}");
+      DocumentSnapshot userData = await FirebaseFirestore.instance
+          .collection('user_data_personal')
+          .doc(currentUser.uid)
+          .get();
+      if (userData.exists) {
+        _username = userData['username'];
+        _quote = userData['quote'];
+        HiveService.setUsername(_username);
+        HiveService.setQuote(_quote);
+      }
+      final querySnapshot = await FirebaseFirestore.instance
+        .collection('user_data_personal')
+        .doc(currentUser.uid)
+        .collection('posts')
+        .get();
+      final likedPostIds = querySnapshot.docs.map((doc) => doc.id).toList();
+      HiveService.setLikedPosts(likedPostIds);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       backgroundColor: Colors.white, 
       body: Center(
@@ -76,14 +85,14 @@ class RegisterScreen extends StatelessWidget {
                 maxWidth: 500,
                 maxHeight: MediaQuery.of(context).size.height * 0.8,
               ),
-              child: registerCard(context),
+              child: signinCard(context),
             )
-          : registerCard(context),
+          : signinCard(context),
       ),
     );
   }
 
-  Widget registerCard(BuildContext context) {
+  Widget signinCard(BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
@@ -97,41 +106,23 @@ class RegisterScreen extends StatelessWidget {
           child: ListView(
             children: <Widget>[
               Image.asset(
-                'assets/images/undraw_adventure.png',
+                'assets/images/undraw_explore.png',
                 height: 400,
                 width: 400,
-                fit: BoxFit.contain,
+                fit: BoxFit.contain, // Makes the image fit within the box
               ),
               Text(
-                'Register',
+                'Sign In',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16.0),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: TextFormField(
-                  controller: usernameController,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your username';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Padding(
+              Padding( // Adds space between the TextFormField widgets
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: TextFormField(
                   controller: emailController,
                   decoration: InputDecoration(
-                    labelText: 'Email',
+                    labelText: 'Email ID',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
@@ -154,69 +145,44 @@ class RegisterScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20.0),
                     ),
                   ),
+                  obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
-                    } else if (value.length < 6) {
-                      return 'Password should be at least 6 characters';
                     }
                     return null;
                   },
-                  obscureText: true,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: TextFormField(
-                  controller: confirmPassController,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
-                    } else if (value != passwordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                  obscureText: true,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: TextFormField(
-                  controller: quoteController,
-                  decoration: InputDecoration(
-                    labelText: 'Favorite Quote',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your favorite quote';
-                    }
-                    return null;
-                  },
-                ),
+              TextButton(
+                onPressed: () {
+                  String email = emailController.text.trim();
+                  if (email.isNotEmpty && email.contains('@')) {
+                    FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("A password reset link has been sent to your email")),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Please enter a valid email address")),
+                    );
+                  }
+                },
+                child: Text('Forgot password?'),
               ),
               Container(
                 width: 150,
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      UserCredential? user = await registerWithFirebase(context);
+                      UserCredential? user = await signInWithFirebase(context);
                       if(user != null){
-                        await _setUserDataToHive(context, usernameController.text, quoteController.text);
+                        await _getCurrentUser(context);
                         GoRouter.of(context).pushReplacement('/user');
                       }
                     }
                   },
-                  child: Text('Register'),
+                  child: Text('Sign In'),
                   style: ButtonStyle(
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
@@ -249,8 +215,8 @@ class RegisterScreen extends StatelessWidget {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text('Notice'),
-                      content: Text('Google sign in is not available until the app is published. Please use the email option.'),
+                      title: Text('Notice!'),
+                      content: Text('Google Sign In is currently unavailable. Please use Email ID to signin.'),
                       actions: <Widget>[
                         TextButton(
                           child: Text('OK'),
@@ -273,11 +239,12 @@ class RegisterScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             TextButton(
               onPressed: () {
-                GoRouter.of(context).pushReplacement('/signin');
+                GoRouter.of(context).pushReplacement('/register');
               },
-              child: Text('Already have an account? Sign In'),
+              child: Text('New to the app? Register'),
             ),
           ],
         ),
