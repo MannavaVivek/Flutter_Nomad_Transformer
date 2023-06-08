@@ -1,5 +1,4 @@
 import 'package:hive/hive.dart';
-import 'blogpost_provider.dart';
 
 part 'blog_content.g.dart';
 

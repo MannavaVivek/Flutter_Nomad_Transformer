@@ -4,8 +4,6 @@ import 'package:rive/rive.dart';
 import 'package:provider/provider.dart';
 
 import 'blog_post.dart';
-import 'blog_content.dart';
-import 'user_provider.dart';
 import 'hive_service.dart';
 import 'blogpost_provider.dart';
 

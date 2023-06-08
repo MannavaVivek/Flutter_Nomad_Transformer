@@ -119,7 +119,6 @@ class _UserScreenState extends State<UserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     return Scaffold(
       extendBodyBehindAppBar: true,

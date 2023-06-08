@@ -2,12 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'blog_content.dart';
-
-
-
-
 
 class BlogPostProvider with ChangeNotifier {
   Map<String, BlogPost> _blogPosts = {};
@@ -23,7 +18,6 @@ class BlogPostProvider with ChangeNotifier {
   }
 
   Future<void> fetchBlogPosts() async {
-    print("fetchBlogPosts-----------------------------------------------------------");
     var querySnapshot = await _firestore.collection('blogposts').get();
     var blogPosts = <String, BlogPost>{};
     
@@ -51,7 +45,6 @@ class BlogPostProvider with ChangeNotifier {
   }
 
   Future<void> saveBlogPostsToHive(List<BlogPost> blogPosts) async {
-    print("saveBlogPostsToHive----------------------------------------------------------");
     final box = await Hive.openBox('blogPosts');
     for (var blogPost in blogPosts) {
       await box.put(blogPost.postId, blogPost);

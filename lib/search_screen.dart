@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'blog_post.dart';
-import 'blog_content.dart';
 import 'blogpost_provider.dart';
 import 'package:provider/provider.dart';
 

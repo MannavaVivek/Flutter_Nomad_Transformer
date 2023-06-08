@@ -1,7 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'hive_service.dart';
 
@@ -19,9 +16,6 @@ class UserProvider with ChangeNotifier {
     try {
       final userId = HiveService.getUserId();
       _userId.value = userId;
-      print("=====================================================================");
-      print("Initial loading from the Hive box: $userId");
-      print("=====================================================================");
     } catch (e) {
       print("Error loading userId from Hive: $e");
     }
@@ -31,9 +25,6 @@ class UserProvider with ChangeNotifier {
 
   Future<void> setUser(String? userId) async {
     _userId.value = userId;
-    print("=====================================================================");
-    print("UserProvider.setUser: $userId");
-    print("=====================================================================");
 
     try {
       HiveService.setUserId(userId);
