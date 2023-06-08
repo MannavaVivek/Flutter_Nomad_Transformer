@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'blog_post.dart';
 import 'blog_content.dart';
+import 'blogpost_provider.dart';
+import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -21,16 +23,22 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   List<String> _filterPosts(String searchQuery) {
+    print("searchQuery: $searchQuery");
     if (searchQuery.isEmpty) {
       return [];
     }
 
     final lowerCaseQuery = searchQuery.toLowerCase();
+    final blogPostProvider = Provider.of<BlogPostProvider>(context, listen: false);
+    final blogPosts = blogPostProvider.blogPosts;
 
-    return blogPosts.keys
+    List<String> filteredPosts = blogPosts.keys
         .where((postId) =>
             blogPosts[postId]!.city.toLowerCase().contains(lowerCaseQuery))
         .toList();
+    
+    print("filteredPosts: $filteredPosts");
+    return filteredPosts;
   }
 
   void navigateToBlogPost(String postId) {
@@ -90,6 +98,8 @@ class _SearchScreenState extends State<SearchScreen> {
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
               children: List.generate(filteredPosts.length, (index) {
+                final blogPostProvider = Provider.of<BlogPostProvider>(context);
+                final blogPosts = blogPostProvider.blogPosts;
                 final postId = filteredPosts[index];
                 final blogPost = blogPosts[postId];
 

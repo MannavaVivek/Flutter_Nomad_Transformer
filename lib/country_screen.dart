@@ -5,6 +5,8 @@ import 'blog_post.dart';
 import 'package:rive/rive.dart';
 import 'blog_content.dart';
 import 'hive_service.dart';
+import 'package:provider/provider.dart';
+import 'blogpost_provider.dart';
 
 class CountryScreen extends StatefulWidget {
   final String countryName;
@@ -124,6 +126,8 @@ class _CountryScreenState extends State<CountryScreen> {
                   ),
                   itemCount: _isExpanded ? filteredPosts.length : blogPostsForCountry.length,
                   itemBuilder: (context, index) {
+                    final blogPostProvider = Provider.of<BlogPostProvider>(context);
+                    final blogPosts = blogPostProvider.blogPosts;
                     final postId = _isExpanded ? filteredPosts[index] : blogPostsForCountry[index].postId;
                     final post = blogPosts[postId];
                     return FutureBuilder<List<String>>(
@@ -290,6 +294,8 @@ class _CountryScreenState extends State<CountryScreen> {
   List<BlogPost> getBlogPostsForCountry(String countryName) {
     // Fetch the blog posts from your data source based on the country
     List<BlogPost> blogPostsForCountry = [];
+    final blogPostProvider = Provider.of<BlogPostProvider>(context);
+    final blogPosts = blogPostProvider.blogPosts;
     blogPosts.forEach((id, post) {
       if (post.country.toLowerCase() == countryName.toLowerCase()) {
         blogPostsForCountry.add(post);

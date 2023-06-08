@@ -7,8 +7,11 @@ import 'food_rec.dart';
 import 'hive_service.dart';
 import 'user_provider.dart';
 import 'package:provider/provider.dart';
+import 'blogpost_provider.dart';
 
-List<BlogPost> getBlogPostsForCountry(String country) {
+List<BlogPost> getBlogPostsForCountry(BuildContext context,String country) {
+  final blogPostProvider = Provider.of<BlogPostProvider>(context);
+  final blogPosts = blogPostProvider.blogPosts;
   return blogPosts.values
       .where((post) => post.country.toLowerCase() == country.toLowerCase())
       .toList();
@@ -232,7 +235,9 @@ class _BlogPostScreenState extends State<BlogPostScreen> {
   @override
   void initState() {
     super.initState();
-    _post = blogPosts[widget.postId]!;
+    // final blogPostProvider = Provider.of<BlogPostProvider>(context);
+    // final blogPosts = blogPostProvider.blogPosts;
+    // _post = blogPosts[widget.postId]!;
     _scrollController = ScrollController();
     _pageController = PageController();
     // connect to the hive class
@@ -242,6 +247,9 @@ class _BlogPostScreenState extends State<BlogPostScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final blogPostProvider = Provider.of<BlogPostProvider>(context);
+    final blogPosts = blogPostProvider.blogPosts;
+    _post = blogPosts[widget.postId]!;
     // Wait for the widget rendering to complete and then scroll
     if (MediaQuery.of(context).size.height > 800) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

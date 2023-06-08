@@ -7,6 +7,8 @@ import 'user_provider.dart';
 import 'blog_post.dart';
 import 'blog_content.dart';
 import 'hive_service.dart';
+import 'blogpost_provider.dart';
+import 'package:provider/provider.dart';
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({Key? key}) : super(key: key);
 
@@ -16,14 +18,17 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   List<BlogPost> likedPosts = [];
+  
 
   @override
   void initState() {
     super.initState();
-    fetchLikedPosts();
+    fetchLikedPosts(context);
   }
 
-  Future<void> fetchLikedPosts() async {
+  Future<void> fetchLikedPosts(BuildContext context) async {
+    final blogPostProvider = Provider.of<BlogPostProvider>(context);
+    final blogPosts = blogPostProvider.blogPosts;
     final likedPostIds = await HiveService.getLikedPosts();
     final allBlogPosts = blogPosts.values.toList();
 
@@ -40,6 +45,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   Widget build(BuildContext context) {
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
+        final blogPostProvider = Provider.of<BlogPostProvider>(context);
+        final blogPosts = blogPostProvider.blogPosts;
         // Listen to changes in likedPostIds
         final likedPostIds = HiveService.getLikedPosts();
         final userId = HiveService.getUserId();

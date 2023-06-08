@@ -7,6 +7,7 @@ import 'blog_post.dart';
 import 'blog_content.dart';
 import 'user_provider.dart';
 import 'hive_service.dart';
+import 'blogpost_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -171,6 +172,8 @@ class HomeScreen extends StatelessWidget {
                           itemCount: recommendedPosts.length,
                           itemBuilder: (context, index) {
                             final postId = recommendedPosts[index];
+                            final blogPostProvider = Provider.of<BlogPostProvider>(context);
+                            final blogPosts = blogPostProvider.blogPosts;
                             return FutureBuilder<List<String>>(
                               future: fetchLikedPostIdsFromHive(),
                               builder: (context, snapshot) {

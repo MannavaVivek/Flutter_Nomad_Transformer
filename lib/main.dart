@@ -16,7 +16,11 @@ import 'user_screen.dart';
 import 'hive_service.dart';
 import 'signin_screen.dart';
 import 'register_screen.dart';
+import 'blog_content.dart';
+import 'blogpost_provider.dart';
+import 'uploader.dart';
 
+// import 'blog_content.g.dart';
 
 final _router = GoRouter(
   routes: [
@@ -73,16 +77,23 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await HiveService.initHive();
+  Hive.registerAdapter(BlogPostAdapter());
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // uploadItemsToFirestore(); // uncomment to upload default items to firestore
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => UserProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider(create: (context) => BlogPostProvider()),
+      ],
       child: MyApp(),
-    ));
+    ),
+  );
 }
+
 
 class MyApp extends StatefulWidget {
   @override
