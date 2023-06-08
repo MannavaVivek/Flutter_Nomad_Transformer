@@ -286,6 +286,8 @@ class _CountryScreenState extends State<CountryScreen> {
         return "Slovakia, tucked away in the heart of Europe, is a hidden gem with rich natural beauty and fascinating history. From the majestic peaks of High Tatras, the ancient castles dotting the landscape, to the charming old town of Bratislava, Slovakia is a haven for nature and history lovers alike. Slovak cuisine, with its comforting soups, hearty dumplings, and delicious pastries, adds to the country's allure";
       case 'italy':
         return "Italy, a land of unparalleled beauty, is a symphony of stunning landscapes, rich history, and profound culture. Known as the birthplace of the Renaissance, Italy boasts numerous works of art and architecture that take your breath away. Its cities bustle with life and color, each with its own distinct character and charm. From the romantic canals of Venice, the majestic Colosseum of Rome, to the scenic vineyards of Tuscany, Italy beckons travelers with its irresistible allure";
+      case 'spain':
+        return "Spain, a country of passion and vibrance, enchants visitors with its diverse landscapes, rich history, and unique cultural experiences. From the lively festivals of Seville, the stunning Gaudi's architecture in Barcelona, to the beautiful sandy beaches of Costa del Sol, Spain is a country that celebrates life in all its colorful glory. With its mouth-watering tapas, world-class wines, and the entrancing Flamenco music and dance, Spain is an unforgettable feast for the senses.";
       default:
         return "No content available for " + countryName;
     }

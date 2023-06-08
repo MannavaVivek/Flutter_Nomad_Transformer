@@ -30,6 +30,7 @@ class HomeScreen extends StatelessWidget {
       'Luxembourg',
       'Netherlands',
       'Slovakia',
+      'Spain',
     ];
 
     const countryUrls = {
@@ -43,6 +44,7 @@ class HomeScreen extends StatelessWidget {
       'Luxembourg': '/country/luxembourg',
       'Netherlands': '/country/netherlands',
       'Slovakia': '/country/slovakia',
+      'Spain': '/country/spain',
     };
 
     const List<String> recommendedPosts = ['1', '2', '3'];
