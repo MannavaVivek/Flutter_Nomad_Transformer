@@ -68,9 +68,9 @@ class HomeScreen extends StatelessWidget {
                   child: Text(
                     'Hello, ${HiveService.getUsername()}',
                     style: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -174,9 +174,18 @@ class HomeScreen extends StatelessWidget {
                             final postId = recommendedPosts[index];
                             final blogPostProvider = Provider.of<BlogPostProvider>(context);
                             final blogPosts = blogPostProvider.blogPosts;
+
                             return FutureBuilder<List<String>>(
                               future: fetchLikedPostIdsFromHive(),
                               builder: (context, snapshot) {
+                                // if (snapshot.connectionState == ConnectionState.waiting) {
+                                //   // Show loading spinner or a placeholder
+                                //   return SizedBox(
+                                //     width: 50, // You can adjust the size
+                                //     height: 50, // You can adjust the size
+                                //     child: CircularProgressIndicator(),
+                                //   );
+                                // } else 
                                 if (snapshot.hasError) {
                                   return Text('Error: ${snapshot.error}');
                                 } else {
@@ -187,6 +196,7 @@ class HomeScreen extends StatelessWidget {
 
                                   if (blogPost == null) {
                                     print('blogPost with postId: $postId is null');
+                                    return SizedBox.shrink(); // Return an empty widget
                                   }
 
                                   return GestureDetector(
@@ -195,13 +205,13 @@ class HomeScreen extends StatelessWidget {
                                       height: 200, // Set the desired height of each item
                                       child: BlogPostListItemHome(
                                         postId: postId,
-                                        title: blogPost?.title ?? 'Unknown',
-                                        summary: blogPost?.summary ?? 'Unknown',
-                                        caption: blogPost?.caption ?? 'Unknown',
-                                        imageUrl: blogPost?.imageUrl ?? 'Unknown',
-                                        imageAttribution: blogPost?.imageAttribution ?? 'Unknown',
-                                        country: blogPost?.country ?? 'Unknown',
-                                        city: blogPost?.city ?? 'Unknown',
+                                        title: blogPost.title,
+                                        summary: blogPost.summary,
+                                        caption: blogPost.caption,
+                                        imageUrl: blogPost.imageUrl,
+                                        imageAttribution: blogPost.imageAttribution,
+                                        country: blogPost.country,
+                                        city: blogPost.city,
                                         isLiked: isLiked,
                                       ),
                                     ),

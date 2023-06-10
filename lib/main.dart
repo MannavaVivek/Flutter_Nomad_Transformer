@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/gestures.dart';
+import 'package:my_travel_stories/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -19,11 +20,18 @@ import 'register_screen.dart';
 import 'blog_content.dart';
 import 'blogpost_provider.dart';
 import 'uploader.dart';
+import 'theme_notifier.dart';
+import 'splash_screen.dart';
 
 // import 'blog_content.g.dart';
 
 final _router = GoRouter(
+  initialLocation: '/splash',
   routes: [
+     GoRoute(
+      path: '/splash',
+      builder: (context, state) => SplashScreen(),
+    ),
     GoRoute(
       path: '/',
       builder: (context, state) => const HomeScreen(),
@@ -88,12 +96,12 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => BlogPostProvider()),
+        ChangeNotifierProvider(create: (context) => ThemeNotifier(ThemeData.light())),
       ],
       child: MyApp(),
     ),
   );
 }
-
 
 class MyApp extends StatefulWidget {
   @override
@@ -127,6 +135,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
       scrollBehavior: MyCustomScrollBehavior(),
+      theme: Provider.of<ThemeNotifier>(context).getTheme(),
     );
   }
 }

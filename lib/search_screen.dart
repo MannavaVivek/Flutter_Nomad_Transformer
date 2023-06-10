@@ -69,23 +69,32 @@ class _SearchScreenState extends State<SearchScreen> {
                           filteredPosts = _filterPosts(value);
                         });
                       },
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+                        fontSize: 16,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Search...',
+                        hintStyle: TextStyle(
+                          color: Colors.black54,
+                        ),
                         border: InputBorder.none,
                       ),
                     ),
                   ),
                   IconButton(
                     icon: Icon(Icons.close),
+                    color:  Colors.black,
                     onPressed: () {
                       setState(() {
                         _searchController.clear();
                         filteredPosts.clear();
                       });
-                      context.pop();
+                      Navigator.pop(context);
                     },
                   ),
                 ],
+
               ),
             ),
           ),
@@ -128,6 +137,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
+                            color: Colors.black,
                           ),
                         ),
                         Text(
