@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 class HiveService {
   static Box<String>? _box;
+  static const String _avatarKey = 'avatarKey';
 
   static Future<void> initHive() async {
     try {
@@ -48,15 +49,21 @@ class HiveService {
   }
 
   static List<String> getLikedPosts() {
-  print("Called getLikedPosts");
-  final likedPostsJson = _box!.get('liked_posts');
-  if (likedPostsJson != null) {
-    final likedPosts = likedPostsJson.split(',');
-    return likedPosts;
-  } else {
-    return [];
+    print("Called getLikedPosts");
+    final likedPostsJson = _box!.get('liked_posts');
+    if (likedPostsJson != null) {
+      final likedPosts = likedPostsJson.split(',');
+      return likedPosts;
+    } else {
+      return [];
+    }
   }
-}
+
+  static String getAvatar() {
+    print("Called getAvatar");
+    return _box!.get(_avatarKey) ?? 'https://firebasestorage.googleapis.com/v0/b/nomad-transformer.appspot.com/o/icons%2Frobot_default_profile_pic.jpg?alt=media&token=35f06ede-afaf-4027-9937-69a0760a7f1e';
+  }
+
 
 
   // Setters
@@ -81,6 +88,13 @@ class HiveService {
     final likedPostsJson = likedPosts.join(',');
     _box!.put('liked_posts', likedPostsJson);
   }
+
+  static void setAvatar(String url) {
+    print("Called setAvatar with url");
+    _box!.put(_avatarKey, url);
+  }
+
+
 
   // Other
   static Box<String>? get box => _box;

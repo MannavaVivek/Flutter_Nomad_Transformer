@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
@@ -86,7 +87,8 @@ class HomeScreen extends StatelessWidget {
                       alignment: Alignment.centerRight,
                       margin: EdgeInsets.only(right: 10),
                       child: CircleAvatar(
-                        backgroundImage: AssetImage('assets/images/wakanda_unsplash.jpg'),
+                        backgroundColor: Theme.of(context).brightness == Brightness.light ? Color.fromARGB(117, 158, 158, 158) : Colors.white,
+                        backgroundImage: CachedNetworkImageProvider(HiveService.getAvatar()),
                       ),
                     ),
                   ),

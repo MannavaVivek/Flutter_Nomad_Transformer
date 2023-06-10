@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,6 +25,7 @@ class _UserScreenState extends State<UserScreen> {
   String _username = '';
   String _quote = "Do I wake up every morning and ask you for Coffee Coffee Cream Cream?";
   bool _isDarkTheme = false;
+  String _imageUrl = '';
 
   @override
   void initState() {
@@ -44,6 +46,7 @@ class _UserScreenState extends State<UserScreen> {
         _user = _auth.currentUser;
         _username = HiveService.getUsername();
         _quote = HiveService.getQuote();
+        _imageUrl = HiveService.getAvatar();
       });
     }
   }
@@ -63,9 +66,11 @@ class _UserScreenState extends State<UserScreen> {
         setState(() {
           _username = userData['username'];
           _quote = userData['quote'];
+          _imageUrl = userData['avatar'];
         });
         HiveService.setUsername(_username);
         HiveService.setQuote(_quote);
+        HiveService.setAvatar(_imageUrl);
       }
       final querySnapshot = await FirebaseFirestore.instance
         .collection('user_data_personal')
@@ -146,10 +151,21 @@ class _UserScreenState extends State<UserScreen> {
               child: Column(
                 children: [
                   SizedBox(height: 100),
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundImage:
-                        AssetImage('assets/images/wakanda_unsplash.jpg'),
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white,
+                        width: 2.0,
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.transparent,
+                      backgroundImage: CachedNetworkImageProvider(HiveService.getAvatar()),
+                    ),
                   ),
                   SizedBox(height: 20),
                   if (_user != null)

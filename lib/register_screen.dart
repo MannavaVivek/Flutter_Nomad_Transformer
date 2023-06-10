@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'hive_service.dart';
 import 'user_provider.dart';
 
@@ -21,12 +24,12 @@ class RegisterScreen extends StatelessWidget {
   Future<UserCredential?> registerWithFirebase(BuildContext context) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
+        email: emailController.text.trim(),
         password: passwordController.text
       );
 
       await FirebaseFirestore.instance.collection('user_data_personal').doc(userCredential.user?.uid).set({
-        'username': usernameController.text,
+        'username': usernameController.text.trim(),
         'quote': quoteController.text,
       });
 
@@ -62,6 +65,90 @@ class RegisterScreen extends StatelessWidget {
     HiveService.setQuote(quote);
     HiveService.setLikedPosts([]);
   }
+
+  Future<List<String>> fetchAvatarsFromFirebase() async {
+  List<String> avatarUrls = [];
+  final ListResult result = await FirebaseStorage.instance.ref('avatars').listAll();
+  for (var itemRef in result.items) {
+    final String url = await itemRef.getDownloadURL();
+    avatarUrls.add(url);
+  }
+  return avatarUrls;
+}
+
+
+  Future<void> showAvatarSelectionDialog(BuildContext context, UserCredential user) async {
+    print("showAvatarSelectionDialog-----------------------------------------------------");
+    List<String> avatarUrls = await fetchAvatarsFromFirebase();
+    await showDialog(
+      context: context,
+      builder: (context) {
+        String? selectedAvatarUrl;
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Choose your avatar'),
+              content: Container(
+                width: double.maxFinite,
+                child: GridView.count(
+                  crossAxisCount: 3, // adjust to your need
+                  children: avatarUrls.map((url) {
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedAvatarUrl = url;
+                        });
+                      },
+                      child: GridTile(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: url == selectedAvatarUrl ? Colors.green : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                          child: Image.network(url),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () async {
+                    if (selectedAvatarUrl != null) {
+                      await _setUserAvatar(context, user, selectedAvatarUrl!);
+                      GoRouter.of(context).pushReplacement('/user');
+                    }
+                  },
+                ),
+              ],
+            );
+          }
+        );
+      },
+    );
+  }
+
+
+
+  Future<void> _setUserAvatar(BuildContext context, UserCredential user, String avatarUrl) async {
+    // Update Firestore
+    print("setUserAvatar-----------------------------------------------------");
+    await FirebaseFirestore.instance.collection('user_data_personal').doc(user.user?.uid).update({
+      'avatar': avatarUrl,
+    });
+
+    // Update Provider
+    Provider.of<UserProvider>(context, listen: false).setAvatar(avatarUrl);
+
+    // Update Hive
+    HiveService.setAvatar(avatarUrl);
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -212,7 +299,8 @@ class RegisterScreen extends StatelessWidget {
                       UserCredential? user = await registerWithFirebase(context);
                       if(user != null){
                         await _setUserDataToHive(context, usernameController.text, quoteController.text);
-                        GoRouter.of(context).pushReplacement('/user');
+                        await showAvatarSelectionDialog(context, user);
+                        // GoRouter.of(context).pushReplacement('/user');
                       }
                     }
                   },

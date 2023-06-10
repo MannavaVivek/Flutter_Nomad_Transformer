@@ -60,6 +60,7 @@ class SigninScreen extends StatelessWidget {
       if (userData.exists) {
         _username = userData['username'];
         _quote = userData['quote'];
+        HiveService.setAvatar(userData['avatar']);
         HiveService.setUsername(_username);
         HiveService.setQuote(_quote);
       }
