@@ -6,9 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'user_provider.dart';
 import 'hive_service.dart';
+import 'theme_notifier.dart';
+import 'pullable_widget.dart';
 
 class UserScreen extends StatefulWidget {
   @override
@@ -20,6 +23,7 @@ class _UserScreenState extends State<UserScreen> {
   User? _user;
   String _username = '';
   String _quote = "Do I wake up every morning and ask you for Coffee Coffee Cream Cream?";
+  bool _isDarkTheme = false;
 
   @override
   void initState() {
@@ -59,7 +63,6 @@ class _UserScreenState extends State<UserScreen> {
         setState(() {
           _username = userData['username'];
           _quote = userData['quote'];
-
         });
         HiveService.setUsername(_username);
         HiveService.setQuote(_quote);
@@ -92,6 +95,16 @@ class _UserScreenState extends State<UserScreen> {
     }
   }
 
+  void _toggleTheme() {
+    if (_isDarkTheme) {
+      Provider.of<ThemeNotifier>(context, listen: false).setTheme(ThemeData.light());
+    } else {
+      Provider.of<ThemeNotifier>(context, listen: false).setTheme(ThemeData.dark());
+    }
+    setState(() {
+      _isDarkTheme = !_isDarkTheme;
+    });
+  }
   Widget buildButton(String label, void Function()? onPressed) {
     return Container(
       width: double.infinity,
@@ -119,7 +132,6 @@ class _UserScreenState extends State<UserScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -127,75 +139,89 @@ class _UserScreenState extends State<UserScreen> {
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: 100),
-              CircleAvatar(
-                radius: 60,
-                backgroundImage:
-                    AssetImage('assets/images/wakanda_unsplash.jpg'),
+      body: Stack(
+        children: [
+          Center(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(height: 100),
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundImage:
+                        AssetImage('assets/images/wakanda_unsplash.jpg'),
+                  ),
+                  SizedBox(height: 20),
+                  if (_user != null)
+                    Text(
+                      'Hello $_username',
+                      style: TextStyle(fontSize: 24),
+                    ),
+                  SizedBox(height: 20),
+                  Container(
+                    width: 300,
+                    height: 400,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 20),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            "“",
+                            style: GoogleFonts.satisfy(fontSize: 36,color: Colors.black),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: _quote.isNotEmpty
+                              ? Text(
+                                  _quote,
+                                  style: GoogleFonts.satisfy(fontSize: 18, color: Colors.black),
+                                )
+                              : Text(
+                                  "Do I wake up every morning and ask you for Coffee Coffee Cream Cream?",
+                                  style: GoogleFonts.satisfy(fontSize: 18, color: Colors.black),
+                                  // set text color to black
+
+
+                                ),
+                        ),
+                        SizedBox(height: 30),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            "”",
+                            style: GoogleFonts.satisfy(fontSize: 36, color: Colors.black),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        if (_user != null)
+                          Text(_user!.displayName ?? ''),
+                        if (_user == null)
+                          buildButton('Sign In', _signIn),
+                        if (_user != null)
+                          buildButton('Sign Out', _signOut),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: 20),
-              if (_user != null)
-                Text(
-                  'Hello $_username',
-                  style: TextStyle(fontSize: 24),
-                ),
-              SizedBox(height: 20),
-              Container(
-                width: 300,
-                height: 400,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        "“",
-                        style: GoogleFonts.satisfy(fontSize: 36),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: _quote.isNotEmpty
-                          ? Text(
-                              _quote,
-                              style: GoogleFonts.satisfy(fontSize: 18),
-                            )
-                          : Text(
-                              "Do I wake up every morning and ask you for Coffee Coffee Cream Cream?",
-                              style: GoogleFonts.satisfy(fontSize: 18),
-                            ),
-                    ),
-                    SizedBox(height: 30),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        "”",
-                        style: GoogleFonts.satisfy(fontSize: 36),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    if (_user != null)
-                      Text(_user!.displayName ?? ''),
-                    if (_user == null)
-                      buildButton('Sign In', _signIn),
-                    if (_user != null)
-                      buildButton('Sign Out', _signOut),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          Positioned(
+            // top: MediaQuery.of(context).size.height * 0.2,
+            right: MediaQuery.of(context).size.width * -0.4,
+            child: PullableWidget(
+              onPull: _toggleTheme,
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: Container(
         height: 60,
