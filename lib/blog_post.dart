@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'blog_content.dart';
 import 'package:rive/rive.dart' hide LinearGradient;
 import 'food_rec.dart';
@@ -7,14 +8,6 @@ import 'hive_service.dart';
 import 'user_provider.dart';
 import 'package:provider/provider.dart';
 import 'blogpost_provider.dart';
-
-List<BlogPost> getBlogPostsForCountry(BuildContext context,String country) {
-  final blogPostProvider = Provider.of<BlogPostProvider>(context);
-  final blogPosts = blogPostProvider.blogPosts;
-  return blogPosts.values
-      .where((post) => post.country.toLowerCase() == country.toLowerCase())
-      .toList();
-}
 
 class BlogPostListItemCountry extends StatelessWidget {
   final String postId;
@@ -54,8 +47,8 @@ class BlogPostListItemCountry extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                Image.asset(
-                  imageUrl,
+                CachedNetworkImage(
+                  imageUrl: imageUrl,
                   width: double.infinity,
                   height: 180,
                   fit: BoxFit.cover,
@@ -140,8 +133,8 @@ class BlogPostListItemHome extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: Image.asset(
-                  imageUrl,
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
@@ -357,8 +350,8 @@ class _BlogPostScreenState extends State<BlogPostScreen> {
                           onExit: (_) => setState(() => _isHovered = false),
                           child: Stack(
                             children: [
-                              Image.asset(
-                                _post.imageUrl,
+                              CachedNetworkImage(
+                                imageUrl: _post.imageUrl,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),

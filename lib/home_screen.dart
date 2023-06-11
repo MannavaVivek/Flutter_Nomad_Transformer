@@ -3,57 +3,53 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
 import 'package:provider/provider.dart';
+import 'package:hive/hive.dart';
 
 import 'blog_post.dart';
 import 'hive_service.dart';
 import 'blogpost_provider.dart';
+import 'country_content_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
+  Future<void> initHive() async {
+    await HiveService.initHive();
+  }
+
+  List<String> get countryNames {
+    final box = Hive.box(CountryProvider.boxName);
+    return box.keys.cast<String>().toList();
+  }
+
+  Map<String, String> get countryUrls {
+    final box = Hive.box(CountryProvider.boxName);
+    return box.toMap().map((key, value) => MapEntry(key, value['url']));
+  }
+
+  Map<String, String> get countryImageUrls {
+    final box = Hive.box(CountryProvider.boxName);
+    return box.toMap().map((key, value) => MapEntry(key, value['imageUrl']));
+  }
+
+  Future<List<String>> fetchLikedPostIdsFromHive() async {
+    final likedPosts = await HiveService.getLikedPosts();
+    return likedPosts;
+  }
+
   @override
   Widget build(BuildContext context) {
-
-    void initState() async {
-      await HiveService.initHive();
-    }
-
-    const countryNames = [
-      'Austria',
-      'Belgium',
-      'CzechRepublic',
-      'France',
-      'Germany',
-      'Hungary',
-      'Italy',
-      'Luxembourg',
-      'Netherlands',
-      'Slovakia',
-      'Spain',
-    ];
-
-    const countryUrls = {
-      'Austria': '/country/austria',
-      'Belgium': '/country/belgium',
-      'CzechRepublic': '/country/czechrepublic',
-      'France': '/country/france',
-      'Germany': '/country/germany',
-      'Hungary': '/country/hungary',
-      'Italy': '/country/italy',
-      'Luxembourg': '/country/luxembourg',
-      'Netherlands': '/country/netherlands',
-      'Slovakia': '/country/slovakia',
-      'Spain': '/country/spain',
-    };
-
     const List<String> recommendedPosts = ['1', '2', '3'];
 
-    Future<List<String>> fetchLikedPostIdsFromHive() async {
-      final likedPosts = await HiveService.getLikedPosts();
-      return likedPosts;
-    }
-
-    initState();
+    return FutureBuilder(
+      future: initHive(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();  // Show loading spinner
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');  // Show error message
+        } else {
+          // Once Hive has been initialized, return the widget as usual
     return SafeArea(
       child: Scaffold(
         body: CustomScrollView(
@@ -132,8 +128,8 @@ class HomeScreen extends StatelessWidget {
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(15),
-                                      child: Image.asset(
-                                        'assets/images/${country.toLowerCase()}_unsplash.jpg',
+                                      child: CachedNetworkImage(
+                                        imageUrl: countryImageUrls[country] ?? '',
                                         width: 100,
                                         height: 100,
                                         fit: BoxFit.cover,
@@ -180,14 +176,6 @@ class HomeScreen extends StatelessWidget {
                             return FutureBuilder<List<String>>(
                               future: fetchLikedPostIdsFromHive(),
                               builder: (context, snapshot) {
-                                // if (snapshot.connectionState == ConnectionState.waiting) {
-                                //   // Show loading spinner or a placeholder
-                                //   return SizedBox(
-                                //     width: 50, // You can adjust the size
-                                //     height: 50, // You can adjust the size
-                                //     child: CircularProgressIndicator(),
-                                //   );
-                                // } else 
                                 if (snapshot.hasError) {
                                   return Text('Error: ${snapshot.error}');
                                 } else {
@@ -319,6 +307,9 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
     );
   }
 }

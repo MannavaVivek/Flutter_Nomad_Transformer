@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'blogpost_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -126,7 +127,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             image: DecorationImage(
-                              image: AssetImage(blogPost!.imageUrl),
+                              image: CachedNetworkImageProvider(blogPost!.imageUrl),
                               fit: BoxFit.cover,
                             ),
                           ),

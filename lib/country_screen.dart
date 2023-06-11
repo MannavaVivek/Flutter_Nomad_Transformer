@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:my_travel_stories/country_content_provider.dart';
 import 'blog_post.dart';
 import 'package:rive/rive.dart';
 import 'blog_content.dart';
 import 'hive_service.dart';
 import 'package:provider/provider.dart';
 import 'blogpost_provider.dart';
+import 'country_content_provider.dart';
 
 class CountryScreen extends StatefulWidget {
   final String countryName;
@@ -39,6 +41,14 @@ class _CountryScreenState extends State<CountryScreen> {
     "Journey into the captivating allure of"
   ];
 
+  String getCountryContent(String countryName) {
+  var data = CountryProvider.getCountryData(countryName);
+  if (data != null) {
+    return data['content'];
+  }
+  return "No content available for $countryName";
+}
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -56,7 +66,10 @@ class _CountryScreenState extends State<CountryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final countryContent = getCountryContent(widget.countryName);
+    print("Building CountryScreen for ${widget.countryName}");
+    final countryName = widget.countryName;
+    final capitalizedCountryName = countryName.substring(0, 1).toUpperCase() + countryName.substring(1);
+    final countryContent = getCountryContent(capitalizedCountryName);
     final blogPostsForCountry = getBlogPostsForCountry(widget.countryName);
 
     int crossAxisCount = MediaQuery.of(context).size.width ~/ 320;
@@ -262,35 +275,6 @@ class _CountryScreenState extends State<CountryScreen> {
         ),
       ),
     );
-  }
-
-  String getCountryContent(String countryName) {
-    switch (countryName) {
-      case 'austria':
-        return "Austria, the landlocked gem of Central Europe, radiates with its imperial history and rugged alpine terrain. The birthplace of Mozart, the country harmoniously blends its rich culture with magnificent landscapes. From the romantic streets of Vienna, the stunning beauty of the Salzkammergut lake region";
-      case 'belgium':
-        return "Belgium, a small country with a big heart, is a place where Medieval meets Modern. With an intoxicating mix of picturesque landscapes, rich history, and distinctive culinary traditions, Belgium offers an unforgettable experience. The cobblestone streets of Bruges, the vibrant heart of Brussels, and the historic charms of Antwerp allure travelers from across the globe. Known worldwide for its superb chocolates, waffles, and beers, Belgium is also a gastronomic paradise";
-      case 'czechrepublic':
-        return "The Czech Republic, heart of Central Europe, is a treasure trove of culture, history, and stunning architecture. This country, where the east meets west, enchants you with its fairy-tale castles, ancient squares, and intriguing folklore. The charm of Prague's ancient bridges and spires, the Moravian vineyards, and the remarkable landscapes of Bohemian Switzerland capture the imagination of every visitor";
-      case 'france':
-        return "France, synonymous with romance and sophistication, has been a cultural beacon for centuries. From the chic boulevards of Paris, the charm of Provencal countryside, to the glamorous French Riviera, France offers an immersive experience in art, history, and gastronomy. Home to some of the world's most acclaimed wines, cheeses, and patisseries, French cuisine is a sensory delight";
-      case 'germany':
-        return "Germany, a powerhouse of Europe, is a harmonious blend of timeless tradition and forward-thinking innovation. This country is known for its lush landscapes, from the stunning Bavarian Alps, the picturesque Black Forest, to the enchanting Rhine Valley. Germany's cities, like the vibrant capital Berlin, historic Munich, and enchanting Heidelberg, offer a journey through time from medieval architecture to modern art and culture";
-      case 'hungary':
-        return "Hungary, the land of Magyars, mesmerizes visitors with its unique blend of Eastern and Western cultures. From the enchanting streets of Budapest, known as the 'Paris of the East', the pristine Lake Balaton, to the historic wine region of Eger, Hungary is full of fascinating surprises. Experience the rejuvenating thermal baths, delve into the flavorsome Hungarian cuisine with its spicy goulash and mouth-watering pastries, and immerse yourself in the country's profound history and vibrant folklore";
-      case 'luxembourg':
-        return "Luxembourg, one of Europe's smallest nations, holds grand surprises in its green heart. This multilingual country brims with castles, forests, and picturesque villages, with the cosmopolitan capital city offering a contrast with its blend of modern and medieval architecture. From the rugged beauty of the Ardennes, the sun-drenched vineyards of the Moselle, to the unique rock formations of Mullerthal, Luxembourg captures the imagination";
-      case 'netherlands':
-        return "The Netherlands, often known as Holland, is a country that captivates with its ingenious mix of tradition and innovation. Famous for its iconic windmills, colorful tulip fields, and charming canals, the country showcases its bond with nature in every corner. From the artistic heritage of Amsterdam, the historic university city of Utrecht, to the modern architecture of Rotterdam, the Netherlands offers diverse experiences";
-      case 'slovakia':
-        return "Slovakia, tucked away in the heart of Europe, is a hidden gem with rich natural beauty and fascinating history. From the majestic peaks of High Tatras, the ancient castles dotting the landscape, to the charming old town of Bratislava, Slovakia is a haven for nature and history lovers alike. Slovak cuisine, with its comforting soups, hearty dumplings, and delicious pastries, adds to the country's allure";
-      case 'italy':
-        return "Italy, a land of unparalleled beauty, is a symphony of stunning landscapes, rich history, and profound culture. Known as the birthplace of the Renaissance, Italy boasts numerous works of art and architecture that take your breath away. Its cities bustle with life and color, each with its own distinct character and charm. From the romantic canals of Venice, the majestic Colosseum of Rome, to the scenic vineyards of Tuscany, Italy beckons travelers with its irresistible allure";
-      case 'spain':
-        return "Spain, a country of passion and vibrance, enchants visitors with its diverse landscapes, rich history, and unique cultural experiences. From the lively festivals of Seville, the stunning Gaudi's architecture in Barcelona, to the beautiful sandy beaches of Costa del Sol, Spain is a country that celebrates life in all its colorful glory. With its mouth-watering tapas, world-class wines, and the entrancing Flamenco music and dance, Spain is an unforgettable feast for the senses.";
-      default:
-        return "No content available for " + countryName;
-    }
   }
 
   List<BlogPost> getBlogPostsForCountry(String countryName) {
