@@ -8,6 +8,7 @@ import 'package:rive/rive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'user_provider.dart';
 import 'hive_service.dart';
@@ -83,8 +84,41 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   void _signIn() async {
-    GoRouter.of(context).push('/signin');
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      _showNoInternetDialog();
+    } else {
+      GoRouter.of(context).push('/signin');
+    }
   }
+
+  Future<void> _showNoInternetDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button to close dialog
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('No internet connection'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You need internet connection to sign in.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   void _signOut() async {
     try {
