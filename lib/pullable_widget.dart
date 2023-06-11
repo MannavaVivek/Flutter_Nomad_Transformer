@@ -14,6 +14,9 @@ class _PullableWidgetState extends State<PullableWidget> {
 
   @override
   Widget build(BuildContext context) {
+    Color color = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.grey[800]!;
     return Container(
       height: MediaQuery.of(context).size.height, // Set height to screen height
       child: GestureDetector(
@@ -38,14 +41,14 @@ class _PullableWidgetState extends State<PullableWidget> {
           children: [
             CustomPaint(
               size: Size(MediaQuery.of(context).size.width, _position),
-              painter: RopePainter(),
+              painter: RopePainter(MediaQuery.of(context).size.width / 2 - 15, color),
             ),
             Positioned(
-              top: _position - 60,
+              top: _position, // Adjust the top position of the text
               left: MediaQuery.of(context).size.width / 2 - 40,
               child: Container(
-                width: 40,
-                height: 120,
+                width: 55, // Change width to contain the text
+                height: 60,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
@@ -56,10 +59,11 @@ class _PullableWidgetState extends State<PullableWidget> {
                     child: Text(
                       'PULL',
                       style: TextStyle(
-                        color: Colors.grey[800],
+                        color: color,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
+                      textAlign: TextAlign.center, // Center the text
                     ),
                   ),
                 ),
@@ -73,16 +77,21 @@ class _PullableWidgetState extends State<PullableWidget> {
 }
 
 class RopePainter extends CustomPainter {
+  final double ropeXPosition;
+  final Color color;
+  
+  RopePainter(this.ropeXPosition, this.color);
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey[800]!
+      ..color = color
       ..strokeWidth = 4
       ..style = PaintingStyle.stroke;
 
     var path = Path();
-    path.moveTo(size.width / 2, 0);
-    path.lineTo(size.width / 2, size.height);
+    path.moveTo(ropeXPosition, 0);
+    path.lineTo(ropeXPosition, size.height);
 
     canvas.drawPath(path, paint);
   }
