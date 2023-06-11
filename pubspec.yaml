@@ -52,6 +52,7 @@ dependencies:
   firebase_storage: ^11.2.2
   appcheck: ^1.0.6
   firebase_app_check: ^0.1.4+2
+  shared_preferences: ^2.1.2
   
 
 dev_dependencies:
