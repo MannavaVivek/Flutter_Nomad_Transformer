@@ -1,6 +1,6 @@
 {
-    "name": "my_travel_stories",
-    "short_name": "my_travel_stories",
+    "name": "nomad_transformer",
+    "short_name": "nomad_transformer",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
