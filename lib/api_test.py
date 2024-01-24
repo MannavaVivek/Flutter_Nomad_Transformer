@@ -8,6 +8,7 @@ client = Client(
 # locales = client.assets()
 # for locale in locales.items:
 #   print(locale.fields())
-entries = client.entries({'metadata.tags.sys.id[all]': 'country'})
-for item in entries.items:
-  print(item.fields())
+entries = client.entries({'metadata.tags.sys.id[all]': 'city'})
+for entry in entries:
+  print(entry.fields())
+  print(entry._metadata['tags'])

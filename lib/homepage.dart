@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'country_content_page.dart'; // Update with your project path
 
 class Country {
   final String name;
@@ -112,8 +112,15 @@ class _HomePageState extends State<HomePage> {
               itemBuilder: (BuildContext context, int index) {
                 Country country = snapshot.data![index];
                 return InkWell(
-                  onTap: () =>
-                      _showCountryDescription(context, country.description),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            CountryPage(countryName: country.name),
+                      ),
+                    );
+                  },
                   child: GridTile(
                     footer: GridTileBar(
                       backgroundColor: Colors.black45,
