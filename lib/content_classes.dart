@@ -4,8 +4,9 @@ part 'content_classes.g.dart';
 
 @Collection()
 class Country {
-  Id id = 007;
+  Id id = Isar.autoIncrement;
 
+  @Index(unique: true, replace: true)
   final String name;
   final String description;
   final String imageAssetID;
@@ -49,14 +50,19 @@ class Country {
 
 @Collection()
 class City {
-  Id id = 143;
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String name;
+
+  final String countryName;
   final String description;
   final String imageAssetID;
   final String imageAssetURL;
 
   City({
     required this.name,
+    required this.countryName,
     required this.description,
     required this.imageAssetID,
     required this.imageAssetURL,
@@ -82,6 +88,8 @@ class City {
 
     if (fields['cityName'] == null) {
       fields['cityName'] = 'No city name';
+    } else if (fields['countryName'] == null) {
+      fields['countryName'] = 'No country name';
     } else if (fields['cityDescription'] == null) {
       fields['cityDescription'] = 'No city description';
     } else if (fields['cityPhoto'] == null) {
@@ -90,6 +98,7 @@ class City {
 
     return City(
       name: fields['cityName'],
+      countryName: fields['countryName'],
       description: fields['cityDescription'],
       imageAssetID: fields['cityPhoto']['sys']['id'],
       imageAssetURL: imageUrl,

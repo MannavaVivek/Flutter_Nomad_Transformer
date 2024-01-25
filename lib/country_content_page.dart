@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'content_classes.dart';
 import 'dart:convert';
+import 'package:isar/isar.dart';
 
 class CountryPage extends StatefulWidget {
+  final Isar isar;
   final String countryName;
 
-  CountryPage({Key? key, required this.countryName}) : super(key: key);
+  CountryPage({Key? key, required this.countryName, required this.isar})
+      : super(key: key);
 
   @override
   _CountryPageState createState() => _CountryPageState();
@@ -63,37 +66,59 @@ class _CountryPageState extends State<CountryPage> {
   }
 
   Future<List<City>> fetchCities(String countryName) async {
-    // Fetch cities from Contentful
-    // Same structure as fetchCountries but change the contentType
-    // Use Country class method to get the ContentType for cities
-
     const String spaceID = 'pqzjijb5vjqz';
     const String accessToken = 'IVqE-SRtoM5IZ8bTHuf0Cwnx3Jb470uML77gX-2mYwQ';
     const String environment = 'master';
-    // contentType is the lowercase of countryname, 'city'
-    countryName = countryName.toLowerCase();
-    String contentType = '$countryName,city';
-    print(contentType);
+    String countryNameL = countryName.toLowerCase();
+    String contentType = '$countryNameL,city';
+
     try {
+      print("Fetching cities from Contentful");
       final response = await http.get(
         Uri.parse(
           'https://cdn.contentful.com/spaces/$spaceID/environments/$environment/entries?access_token=$accessToken&metadata.tags.sys.id[all]=$contentType',
         ),
       );
 
+      print("Response status code: ${response.statusCode}");
+
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         final includes = jsonResponse['includes'];
 
         List<dynamic> body = jsonResponse['items'];
-        return body
-            .map((dynamic item) => City.fromJson(item, includes))
-            .toList();
+        List<City> cities =
+            body.map((dynamic item) => City.fromJson(item, includes)).toList();
+
+        // Save to Isar
+        await widget.isar.writeTxn(() async {
+          for (var city in cities) {
+            print('Saving city ${city.name} to Isar');
+            await widget.isar.citys.put(city);
+          }
+        });
+
+        return cities;
       } else {
-        throw Exception('Failed to load data');
+        // Fetch from Isar if API fails
+        return await widget.isar.citys
+            .filter()
+            .countryNameEqualTo(countryName)
+            .findAll();
       }
     } catch (e) {
-      throw Exception('Failed to load data: $e');
+      // Fetch from Isar if there's an exception
+      print("Exception: $e");
+      List<City> cachedCities = await widget.isar.citys
+          .filter()
+          .countryNameEqualTo(countryName)
+          .findAll();
+      if (cachedCities.isNotEmpty) {
+        print("Cached cities: ${cachedCities.length}");
+        return cachedCities;
+      } else {
+        throw Exception('Failed to load cities');
+      }
     }
   }
 }

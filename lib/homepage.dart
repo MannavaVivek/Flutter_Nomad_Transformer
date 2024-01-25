@@ -52,8 +52,8 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            CountryPage(countryName: country.name),
+                        builder: (context) => CountryPage(
+                            countryName: country.name, isar: widget.isar),
                       ),
                     );
                   },
@@ -119,24 +119,52 @@ class _HomePageState extends State<HomePage> {
     const String environment = 'master';
     const String contentType = 'country';
 
-    final response = await http.get(
-      Uri.parse(
-        'https://cdn.contentful.com/spaces/$spaceId/environments/$environment/entries?access_token=$accessToken&metadata.tags.sys.id[all]=$contentType',
-      ),
-    );
+    // If not available in Isar, fetch from API
+    try {
+      final response = await http.get(
+        Uri.parse(
+          'https://cdn.contentful.com/spaces/$spaceId/environments/$environment/entries?access_token=$accessToken&metadata.tags.sys.id[all]=$contentType',
+        ),
+      );
 
-    if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      final includes = jsonResponse['includes'];
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        final includes = jsonResponse['includes'];
 
-      List<dynamic> body = jsonResponse['items'];
-      return body
-          .map((dynamic item) => Country.fromJson(item, includes))
-          .toList();
-    } else {
-      print('Failed to load countries from Contentful: ${response.statusCode}');
-      print('Response body: ${response.body}');
-      throw Exception('Failed to load countries from Contentful');
+        List<dynamic> body = jsonResponse['items'];
+        List<Country> countries = body
+            .map((dynamic item) => Country.fromJson(item, includes))
+            .toList();
+
+        // Save countries to Isar
+        await widget.isar.writeTxn(() async {
+          for (var country in countries) {
+            print('Saving country: ${country.name}');
+            await widget.isar.countrys.put(country);
+          }
+        });
+
+        return countries;
+      } else {
+        print('Response body: ${response.body}');
+        List<Country> cachedCountries =
+            await widget.isar.countrys.where().limit(200).findAll();
+        if (cachedCountries.isNotEmpty) {
+          return cachedCountries;
+        } else {
+          throw Exception('Failed to load countries');
+        }
+      }
+    } catch (e) {
+      print('Error fetching countries: $e');
+      List<Country> cachedCountries =
+          await widget.isar.countrys.where().limit(200).findAll();
+      if (cachedCountries.isNotEmpty) {
+        print(cachedCountries.length);
+        return cachedCountries;
+      } else {
+        throw Exception('Failed to load countries');
+      }
     }
   }
 }

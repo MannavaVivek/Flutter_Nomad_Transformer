@@ -43,7 +43,21 @@ const CountrySchema = CollectionSchema(
   deserialize: _countryDeserialize,
   deserializeProp: _countryDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'name': IndexSchema(
+      id: 879695947855722453,
+      name: r'name',
+      unique: true,
+      replace: true,
+      properties: [
+        IndexPropertySchema(
+          name: r'name',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _countryGetId,
@@ -125,6 +139,60 @@ void _countryAttach(IsarCollection<dynamic> col, Id id, Country object) {
   object.id = id;
 }
 
+extension CountryByIndex on IsarCollection<Country> {
+  Future<Country?> getByName(String name) {
+    return getByIndex(r'name', [name]);
+  }
+
+  Country? getByNameSync(String name) {
+    return getByIndexSync(r'name', [name]);
+  }
+
+  Future<bool> deleteByName(String name) {
+    return deleteByIndex(r'name', [name]);
+  }
+
+  bool deleteByNameSync(String name) {
+    return deleteByIndexSync(r'name', [name]);
+  }
+
+  Future<List<Country?>> getAllByName(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return getAllByIndex(r'name', values);
+  }
+
+  List<Country?> getAllByNameSync(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'name', values);
+  }
+
+  Future<int> deleteAllByName(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'name', values);
+  }
+
+  int deleteAllByNameSync(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'name', values);
+  }
+
+  Future<Id> putByName(Country object) {
+    return putByIndex(r'name', object);
+  }
+
+  Id putByNameSync(Country object, {bool saveLinks = true}) {
+    return putByIndexSync(r'name', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByName(List<Country> objects) {
+    return putAllByIndex(r'name', objects);
+  }
+
+  List<Id> putAllByNameSync(List<Country> objects, {bool saveLinks = true}) {
+    return putAllByIndexSync(r'name', objects, saveLinks: saveLinks);
+  }
+}
+
 extension CountryQueryWhereSort on QueryBuilder<Country, Country, QWhere> {
   QueryBuilder<Country, Country, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
@@ -196,6 +264,50 @@ extension CountryQueryWhere on QueryBuilder<Country, Country, QWhereClause> {
         upper: upperId,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<Country, Country, QAfterWhereClause> nameEqualTo(String name) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'name',
+        value: [name],
+      ));
+    });
+  }
+
+  QueryBuilder<Country, Country, QAfterWhereClause> nameNotEqualTo(
+      String name) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [],
+              upper: [name],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [name],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [name],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [],
+              upper: [name],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
@@ -974,23 +1086,28 @@ const CitySchema = CollectionSchema(
   name: r'City',
   id: 7924339642267295226,
   properties: {
-    r'description': PropertySchema(
+    r'countryName': PropertySchema(
       id: 0,
+      name: r'countryName',
+      type: IsarType.string,
+    ),
+    r'description': PropertySchema(
+      id: 1,
       name: r'description',
       type: IsarType.string,
     ),
     r'imageAssetID': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'imageAssetID',
       type: IsarType.string,
     ),
     r'imageAssetURL': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'imageAssetURL',
       type: IsarType.string,
     ),
     r'name': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'name',
       type: IsarType.string,
     )
@@ -1000,7 +1117,21 @@ const CitySchema = CollectionSchema(
   deserialize: _cityDeserialize,
   deserializeProp: _cityDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'name': IndexSchema(
+      id: 879695947855722453,
+      name: r'name',
+      unique: true,
+      replace: true,
+      properties: [
+        IndexPropertySchema(
+          name: r'name',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _cityGetId,
@@ -1015,6 +1146,7 @@ int _cityEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.countryName.length * 3;
   bytesCount += 3 + object.description.length * 3;
   bytesCount += 3 + object.imageAssetID.length * 3;
   bytesCount += 3 + object.imageAssetURL.length * 3;
@@ -1028,10 +1160,11 @@ void _citySerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.description);
-  writer.writeString(offsets[1], object.imageAssetID);
-  writer.writeString(offsets[2], object.imageAssetURL);
-  writer.writeString(offsets[3], object.name);
+  writer.writeString(offsets[0], object.countryName);
+  writer.writeString(offsets[1], object.description);
+  writer.writeString(offsets[2], object.imageAssetID);
+  writer.writeString(offsets[3], object.imageAssetURL);
+  writer.writeString(offsets[4], object.name);
 }
 
 City _cityDeserialize(
@@ -1041,10 +1174,11 @@ City _cityDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = City(
-    description: reader.readString(offsets[0]),
-    imageAssetID: reader.readString(offsets[1]),
-    imageAssetURL: reader.readString(offsets[2]),
-    name: reader.readString(offsets[3]),
+    countryName: reader.readString(offsets[0]),
+    description: reader.readString(offsets[1]),
+    imageAssetID: reader.readString(offsets[2]),
+    imageAssetURL: reader.readString(offsets[3]),
+    name: reader.readString(offsets[4]),
   );
   object.id = id;
   return object;
@@ -1065,6 +1199,8 @@ P _cityDeserializeProp<P>(
       return (reader.readString(offset)) as P;
     case 3:
       return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -1080,6 +1216,60 @@ List<IsarLinkBase<dynamic>> _cityGetLinks(City object) {
 
 void _cityAttach(IsarCollection<dynamic> col, Id id, City object) {
   object.id = id;
+}
+
+extension CityByIndex on IsarCollection<City> {
+  Future<City?> getByName(String name) {
+    return getByIndex(r'name', [name]);
+  }
+
+  City? getByNameSync(String name) {
+    return getByIndexSync(r'name', [name]);
+  }
+
+  Future<bool> deleteByName(String name) {
+    return deleteByIndex(r'name', [name]);
+  }
+
+  bool deleteByNameSync(String name) {
+    return deleteByIndexSync(r'name', [name]);
+  }
+
+  Future<List<City?>> getAllByName(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return getAllByIndex(r'name', values);
+  }
+
+  List<City?> getAllByNameSync(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'name', values);
+  }
+
+  Future<int> deleteAllByName(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'name', values);
+  }
+
+  int deleteAllByNameSync(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'name', values);
+  }
+
+  Future<Id> putByName(City object) {
+    return putByIndex(r'name', object);
+  }
+
+  Id putByNameSync(City object, {bool saveLinks = true}) {
+    return putByIndexSync(r'name', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByName(List<City> objects) {
+    return putAllByIndex(r'name', objects);
+  }
+
+  List<Id> putAllByNameSync(List<City> objects, {bool saveLinks = true}) {
+    return putAllByIndexSync(r'name', objects, saveLinks: saveLinks);
+  }
 }
 
 extension CityQueryWhereSort on QueryBuilder<City, City, QWhere> {
@@ -1155,9 +1345,182 @@ extension CityQueryWhere on QueryBuilder<City, City, QWhereClause> {
       ));
     });
   }
+
+  QueryBuilder<City, City, QAfterWhereClause> nameEqualTo(String name) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'name',
+        value: [name],
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterWhereClause> nameNotEqualTo(String name) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [],
+              upper: [name],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [name],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [name],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'name',
+              lower: [],
+              upper: [name],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
 }
 
 extension CityQueryFilter on QueryBuilder<City, City, QFilterCondition> {
+  QueryBuilder<City, City, QAfterFilterCondition> countryNameEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'countryName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> countryNameGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'countryName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> countryNameLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'countryName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> countryNameBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'countryName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> countryNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'countryName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> countryNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'countryName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> countryNameContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'countryName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> countryNameMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'countryName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> countryNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'countryName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> countryNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'countryName',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<City, City, QAfterFilterCondition> descriptionEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1734,6 +2097,18 @@ extension CityQueryObject on QueryBuilder<City, City, QFilterCondition> {}
 extension CityQueryLinks on QueryBuilder<City, City, QFilterCondition> {}
 
 extension CityQuerySortBy on QueryBuilder<City, City, QSortBy> {
+  QueryBuilder<City, City, QAfterSortBy> sortByCountryName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countryName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<City, City, QAfterSortBy> sortByCountryNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countryName', Sort.desc);
+    });
+  }
+
   QueryBuilder<City, City, QAfterSortBy> sortByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -1784,6 +2159,18 @@ extension CityQuerySortBy on QueryBuilder<City, City, QSortBy> {
 }
 
 extension CityQuerySortThenBy on QueryBuilder<City, City, QSortThenBy> {
+  QueryBuilder<City, City, QAfterSortBy> thenByCountryName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countryName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<City, City, QAfterSortBy> thenByCountryNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countryName', Sort.desc);
+    });
+  }
+
   QueryBuilder<City, City, QAfterSortBy> thenByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -1846,6 +2233,13 @@ extension CityQuerySortThenBy on QueryBuilder<City, City, QSortThenBy> {
 }
 
 extension CityQueryWhereDistinct on QueryBuilder<City, City, QDistinct> {
+  QueryBuilder<City, City, QDistinct> distinctByCountryName(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'countryName', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<City, City, QDistinct> distinctByDescription(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1880,6 +2274,12 @@ extension CityQueryProperty on QueryBuilder<City, City, QQueryProperty> {
   QueryBuilder<City, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<City, String, QQueryOperations> countryNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'countryName');
     });
   }
 
