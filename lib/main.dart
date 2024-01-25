@@ -125,7 +125,7 @@ class _MainScreenState extends State<MainScreen> {
         // Save countries to Isar
         await isar.writeTxn(() async {
           for (var country in countries) {
-            countriesList.add(country.name.toLowerCase());
+            countriesList.add(country.name);
             await isar.countrys.put(country);
           }
         });

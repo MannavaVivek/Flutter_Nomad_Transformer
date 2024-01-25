@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'country_content_page.dart';
 import 'content_classes.dart';
 import 'package:isar/isar.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 // HomePage widget
 class HomePage extends StatefulWidget {
@@ -49,40 +50,36 @@ class _HomePageState extends State<HomePage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => CountryPage(
-                                  countryName: country.name, isar: widget.isar),
+                                  countryName: country.name,
+                                  isar: widget.isar,
+                                  countryDescription: country.description),
                             ),
                           );
                         },
                         child: Container(
                           width: 150, // Adjust width to 150px
-                          margin: EdgeInsets.only(
+                          margin: const EdgeInsets.only(
                               right: 10), // Spacing between tiles
                           child: Column(
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
-                                child: Image.network(
-                                  'https:${country.imageAssetURL}',
+                                child: CachedNetworkImage(
+                                  imageUrl: 'https:${country.imageAssetURL}',
                                   width: 150, // Adjust width to 150px
                                   height: 150, // Adjust height to 150px
                                   fit: BoxFit.cover,
-                                  errorBuilder: (BuildContext context,
-                                      Object error, StackTrace? stackTrace) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                Colors.purple),
-                                      ),
-                                    );
-                                  },
+                                  errorWidget: (context, url, error) =>
+                                      const Center(
+                                    child: Icon(Icons.error),
+                                  ),
                                 ),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                   height: 10), // Spacing between image and text
                               Text(
                                 country.name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontFamily:
                                         'Nunito'), // Adjust text style as needed
                               ),

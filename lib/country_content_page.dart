@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'content_classes.dart';
 import 'package:isar/isar.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CountryPage extends StatefulWidget {
   final Isar isar;
   final String countryName;
+  final String countryDescription; // New parameter for country description
 
-  CountryPage({Key? key, required this.countryName, required this.isar})
-      : super(key: key);
+  CountryPage({
+    Key? key,
+    required this.countryName,
+    required this.isar,
+    required this.countryDescription, // Initialize the new parameter
+  }) : super(key: key);
 
   @override
   CountryPageState createState() => CountryPageState();
@@ -15,6 +21,7 @@ class CountryPage extends StatefulWidget {
 
 class CountryPageState extends State<CountryPage> {
   late Future<List<City>> futureCities;
+  Map<String, bool> favoriteCities = {}; // Track favorite cities
 
   @override
   void initState() {
@@ -34,42 +41,124 @@ class CountryPageState extends State<CountryPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (snapshot.hasData) {
-            return GridView.builder(
-              itemCount: snapshot.data?.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.0,
-                mainAxisSpacing: 4.0,
-                crossAxisSpacing: 4.0,
-              ),
-              itemBuilder: (BuildContext context, int index) {
-                City city = snapshot.data![index];
-                return GridTile(
-                  footer: GridTileBar(
-                    backgroundColor: Colors.black45,
-                    title: Text(city.name),
-                  ),
-                  child: Image.network(
-                    'https:${city.imageAssetURL}',
-                    fit: BoxFit.cover,
-                    errorBuilder: (BuildContext context, Object error,
-                        StackTrace? stackTrace) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.purple),
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(widget
+                      .countryDescription), // Display the passed country description
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: snapshot.data?.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      City city = snapshot.data![index];
+                      bool isFavorite = favoriteCities[city.name] ?? false;
+                      return Container(
+                        margin: const EdgeInsets.all(10),
+                        height: 200, // Tile height
+                        width: 300, // Tile width
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 5,
+                              blurRadius: 7,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: CachedNetworkImage(
+                                imageUrl: 'https:${city.imageAssetURL}',
+                                width: double.infinity, // Image width
+                                height: 200, // Image height
+                                fit: BoxFit.cover,
+                                errorWidget: (context, url, error) =>
+                                    const Center(child: Icon(Icons.error)),
+                              ),
+                            ),
+                            Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    bottomLeft: Radius.circular(10),
+                                    bottomRight: Radius.circular(10),
+                                  ),
+                                  child: Container(
+                                    height: 50,
+                                    decoration: const BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors
+                                              .transparent, // Top of the gradient is transparent
+                                          Colors
+                                              .grey, // Bottom of the gradient is white
+                                        ],
+                                      ),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      city.name,
+                                      style: const TextStyle(
+                                          fontFamily: 'Nunito',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors
+                                              .white), // Adjust text style as needed
+                                    ),
+                                  ),
+                                )),
+                            Positioned(
+                              top: 130, // Position where image and text meet
+                              right: 15,
+                              child: FloatingActionButton(
+                                mini: true,
+                                shape: const CircleBorder(),
+                                backgroundColor: Colors.white,
+                                child: Icon(
+                                  Icons.favorite,
+                                  color: isFavorite ? Colors.red : Colors.grey,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    favoriteCities[city.name] = !isFavorite;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
                   ),
-                );
-              },
+                )
+              ],
             );
           }
           return const Center(child: Text('No data found'));
         },
       ),
     );
+  }
+
+  Future<Country> fetchCountryDescription(String countryName) async {
+    // Fetch the country's description from Isar
+    Country? countryEntry =
+        await widget.isar.countrys.where().nameEqualTo(countryName).findFirst();
+    if (countryEntry == null) {
+      throw Exception('Failed to load country');
+    }
+    return countryEntry;
   }
 
   Future<List<City>> fetchCities(String countryName) async {
