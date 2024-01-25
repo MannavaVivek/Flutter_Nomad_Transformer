@@ -4,32 +4,58 @@ import 'HomePage.dart'; // Import your pages
 import 'SearchPage.dart';
 import 'FavoritesPage.dart';
 import 'UserPage.dart';
+import 'content_classes.dart';
 
-void main() => runApp(MyApp());
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Isar
+  final dir = await getApplicationDocumentsDirectory();
+  final isar = await Isar.open(
+    [CountrySchema, CitySchema],
+    directory: dir.path,
+  );
+
+  runApp(MyApp(isar: isar));
+}
 
 class MyApp extends StatelessWidget {
+  final Isar isar;
+
+  const MyApp({required this.isar});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: MainScreen(),
+      home: MainScreen(
+        isar: isar,
+      ),
     );
   }
 }
 
+//TODO: Add isar close in dispose
 class MainScreen extends StatefulWidget {
+  final Isar isar;
+
+  MainScreen({required this.isar});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  final List<Widget> _pages = [
-    HomePage(),
-    SearchPage(),
-    FavoritesPage(),
-    UserPage()
+  late final List<Widget> _pages = [
+    HomePage(isar: widget.isar),
+    SearchPage(isar: widget.isar),
+    FavoritesPage(isar: widget.isar),
+    UserPage(isar: widget.isar)
   ];
 
   void _onItemTapped(int index) {

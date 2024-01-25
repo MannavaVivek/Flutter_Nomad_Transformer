@@ -1,54 +1,7 @@
-import 'package:flutter/material.dart'; // Update with your project path
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'content_classes.dart';
 import 'dart:convert';
-
-class City {
-  final String name;
-  final String description;
-  final String imageAssetID;
-  final String imageAssetURL;
-
-  City({
-    required this.name,
-    required this.description,
-    required this.imageAssetID,
-    required this.imageAssetURL,
-  });
-
-  factory City.fromJson(
-      Map<String, dynamic> json, Map<String, dynamic> includes) {
-    // Similar implementation as Country.fromJson
-    final fields = json['fields'];
-
-    final matchingAsset = includes['Asset'].firstWhere(
-      (asset) => asset['sys']['id'] == json['fields']['cityPhoto']['sys']['id'],
-      orElse: () => null,
-    );
-
-    String imageUrl = "";
-    if (matchingAsset != null) {
-      imageUrl = matchingAsset['fields']['file']['url'];
-      print('Image URL: $imageUrl');
-    } else {
-      print('No matching asset found');
-    }
-
-    if (fields['cityName'] == null) {
-      fields['cityName'] = 'No city name';
-    } else if (fields['cityDescription'] == null) {
-      fields['cityDescription'] = 'No city description';
-    } else if (fields['cityPhoto'] == null) {
-      fields['cityPhoto'] = 'No city photo';
-    }
-
-    return City(
-      name: fields['cityName'],
-      description: fields['cityDescription'],
-      imageAssetID: fields['cityPhoto']['sys']['id'],
-      imageAssetURL: imageUrl,
-    );
-  }
-}
 
 class CountryPage extends StatefulWidget {
   final String countryName;

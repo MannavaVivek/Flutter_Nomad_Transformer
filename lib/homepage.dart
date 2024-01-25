@@ -1,80 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'country_content_page.dart'; // Update with your project path
-
-class Country {
-  final String name;
-  final String description;
-  final String imageAssetID;
-  final String imageAssetURL;
-
-  Country({
-    required this.name,
-    required this.description,
-    required this.imageAssetID,
-    required this.imageAssetURL,
-  });
-
-  factory Country.fromJson(
-      Map<String, dynamic> json, Map<String, dynamic> includes) {
-    final fields = json['fields'];
-
-    // Find the asset in the includes.assets list with matching sys.id
-    final matchingAsset = includes['Asset'].firstWhere(
-      (asset) =>
-          asset['sys']['id'] == json['fields']['countryPhoto']['sys']['id'],
-      orElse: () => null,
-    );
-
-    String imageUrl = "";
-
-    if (matchingAsset != null) {
-      imageUrl = matchingAsset['fields']['file']['url'];
-      print('Image URL: $imageUrl');
-    } else {
-      print('No matching asset found');
-    }
-
-    return Country(
-      name: fields['countryName'],
-      description: fields['countryDescription'],
-      imageAssetID: fields['countryPhoto']['sys']['id'],
-      imageAssetURL: imageUrl,
-    );
-  }
-}
-
-// Function to fetch countries from Contentful
-Future<List<Country>> fetchCountries() async {
-  const String spaceId = 'pqzjijb5vjqz';
-  const String accessToken = 'IVqE-SRtoM5IZ8bTHuf0Cwnx3Jb470uML77gX-2mYwQ';
-  const String environment = 'master';
-  const String contentType = 'country';
-
-  final response = await http.get(
-    Uri.parse(
-      'https://cdn.contentful.com/spaces/$spaceId/environments/$environment/entries?access_token=$accessToken&metadata.tags.sys.id[all]=$contentType',
-    ),
-  );
-
-  if (response.statusCode == 200) {
-    final jsonResponse = json.decode(response.body);
-    final includes = jsonResponse['includes'];
-
-    List<dynamic> body = jsonResponse['items'];
-    return body
-        .map((dynamic item) => Country.fromJson(item, includes))
-        .toList();
-  } else {
-    print('Failed to load countries from Contentful: ${response.statusCode}');
-    print('Response body: ${response.body}');
-    throw Exception('Failed to load countries from Contentful');
-  }
-}
+import 'country_content_page.dart';
+import 'content_classes.dart';
+import 'package:isar/isar.dart';
 
 // HomePage widget
 class HomePage extends StatefulWidget {
+  final Isar isar;
+
+  HomePage({Key? key, required this.isar}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -173,6 +109,34 @@ class _HomePageState extends State<HomePage> {
   void _loadCountries() {
     if (countriesList.isEmpty) {
       _fetchAndStoreCountries();
+    }
+  }
+
+  // Function to fetch countries from Contentful
+  Future<List<Country>> fetchCountries() async {
+    const String spaceId = 'pqzjijb5vjqz';
+    const String accessToken = 'IVqE-SRtoM5IZ8bTHuf0Cwnx3Jb470uML77gX-2mYwQ';
+    const String environment = 'master';
+    const String contentType = 'country';
+
+    final response = await http.get(
+      Uri.parse(
+        'https://cdn.contentful.com/spaces/$spaceId/environments/$environment/entries?access_token=$accessToken&metadata.tags.sys.id[all]=$contentType',
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      final includes = jsonResponse['includes'];
+
+      List<dynamic> body = jsonResponse['items'];
+      return body
+          .map((dynamic item) => Country.fromJson(item, includes))
+          .toList();
+    } else {
+      print('Failed to load countries from Contentful: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      throw Exception('Failed to load countries from Contentful');
     }
   }
 }

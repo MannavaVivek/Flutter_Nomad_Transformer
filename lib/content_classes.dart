@@ -1,39 +1,98 @@
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:isar/isar.dart';
 
+part 'content_classes.g.dart';
+
+@Collection()
 class Country {
+  Id id = 007;
+
   final String name;
   final String description;
-  final String imageUrl;
+  final String imageAssetID;
+  final String imageAssetURL;
 
-  Country(
-      {required this.name, required this.description, required this.imageUrl});
+  Country({
+    required this.name,
+    required this.description,
+    required this.imageAssetID,
+    required this.imageAssetURL,
+  });
 
-  factory Country.fromJson(Map<String, dynamic> json) {
+  factory Country.fromJson(
+      Map<String, dynamic> json, Map<String, dynamic> includes) {
+    final fields = json['fields'];
+
+    // Find the asset in the includes.assets list with matching sys.id
+    final matchingAsset = includes['Asset'].firstWhere(
+      (asset) =>
+          asset['sys']['id'] == json['fields']['countryPhoto']['sys']['id'],
+      orElse: () => null,
+    );
+
+    String imageUrl = "";
+
+    if (matchingAsset != null) {
+      imageUrl = matchingAsset['fields']['file']['url'];
+      print('Image URL: $imageUrl');
+    } else {
+      print('No matching asset found');
+    }
+
     return Country(
-      name: json['fields']['country_name'],
-      description: json['fields']['country_description'],
-      imageUrl: json['fields']['country_photo']['fields']['file']['url'],
+      name: fields['countryName'],
+      description: fields['countryDescription'],
+      imageAssetID: fields['countryPhoto']['sys']['id'],
+      imageAssetURL: imageUrl,
     );
   }
 }
 
-Future<List<Country>> fetchCountries() async {
-  const String spaceId = 'pqzjijb5vjqz';
-  const String accessToken = 'IVqE-SRtoM5IZ8bTHuf0Cwnx3Jb470uML77gX-2mYwQ';
-  const String environment = 'master';
-  const String contentType = 'country';
+@Collection()
+class City {
+  Id id = 143;
+  final String name;
+  final String description;
+  final String imageAssetID;
+  final String imageAssetURL;
 
-  final response = await http.get(
-    Uri.parse(
-        'https://cdn.contentful.com/spaces/$spaceId/environments/$environment/entries?access_token=$accessToken&content_type=$contentType'),
-  );
+  City({
+    required this.name,
+    required this.description,
+    required this.imageAssetID,
+    required this.imageAssetURL,
+  });
 
-  if (response.statusCode == 200) {
-    List<dynamic> body = json.decode(response.body)['items'];
-    return body.map((dynamic item) => Country.fromJson(item)).toList();
-  } else {
-    throw Exception('Failed to load countries from Contentful');
+  factory City.fromJson(
+      Map<String, dynamic> json, Map<String, dynamic> includes) {
+    // Similar implementation as Country.fromJson
+    final fields = json['fields'];
+
+    final matchingAsset = includes['Asset'].firstWhere(
+      (asset) => asset['sys']['id'] == json['fields']['cityPhoto']['sys']['id'],
+      orElse: () => null,
+    );
+
+    String imageUrl = "";
+    if (matchingAsset != null) {
+      imageUrl = matchingAsset['fields']['file']['url'];
+      print('Image URL: $imageUrl');
+    } else {
+      print('No matching asset found');
+    }
+
+    if (fields['cityName'] == null) {
+      fields['cityName'] = 'No city name';
+    } else if (fields['cityDescription'] == null) {
+      fields['cityDescription'] = 'No city description';
+    } else if (fields['cityPhoto'] == null) {
+      fields['cityPhoto'] = 'No city photo';
+    }
+
+    return City(
+      name: fields['cityName'],
+      description: fields['cityDescription'],
+      imageAssetID: fields['cityPhoto']['sys']['id'],
+      imageAssetURL: imageUrl,
+    );
   }
 }
