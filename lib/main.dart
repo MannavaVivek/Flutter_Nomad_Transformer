@@ -16,7 +16,7 @@ void main() async {
   // Initialize Isar
   final dir = await getApplicationDocumentsDirectory();
   final isar = await Isar.open(
-    [CountrySchema, CitySchema],
+    [CountrySchema, CitySchema, RecommendationSchema],
     directory: dir.path,
   );
 
@@ -41,6 +41,7 @@ class MyApp extends StatelessWidget {
 }
 
 //TODO: Add isar close in dispose
+//TODO: Add logger if print statements are really necessary
 class MainScreen extends StatefulWidget {
   final Isar isar;
 
@@ -131,7 +132,7 @@ class _MainScreenState extends State<MainScreen> {
         });
       } else {
         List<Country> cachedCountries =
-            await widget.isar.countrys.where().limit(200).findAll();
+            await widget.isar.countrys.where().findAll();
         if (cachedCountries.isNotEmpty) {
           print('Main - API Error - Fetched countries from Isar');
         } else {
@@ -165,9 +166,32 @@ class _MainScreenState extends State<MainScreen> {
           });
         }
       }
+      print('Main - API Success - Fetched countries and cities from API');
+      // Fetch recommendations
+      const String recommendationContentType = 'recommendedReads';
+      final recommendationResponse = await http.get(
+        Uri.parse(
+          'https://cdn.contentful.com/spaces/$spaceID/environments/$environment/entries?access_token=$accessToken&content_type=$recommendationContentType',
+        ),
+      );
+
+      if (recommendationResponse.statusCode == 200) {
+        final recommendationJsonResponse =
+            json.decode(recommendationResponse.body);
+        List<Recommendation> recommendations =
+            Recommendation.fromApiResponse(recommendationJsonResponse);
+
+        // Save recommendations to Isar
+        await isar.writeTxn(() async {
+          for (var recommendation in recommendations) {
+            await isar.recommendations.put(recommendation);
+          }
+        });
+      } else {
+        // Handle error or load cached recommendations if necessary
+      }
     } catch (e) {
-      print('Error during fetch: $e');
-      // You may want to handle this error appropriately, perhaps with a retry mechanism or user notification
+      throw Exception('Failed to load content');
     }
   }
 

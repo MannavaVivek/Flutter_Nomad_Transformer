@@ -2307,3 +2307,989 @@ extension CityQueryProperty on QueryBuilder<City, City, QQueryProperty> {
     });
   }
 }
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+extension GetRecommendationCollection on Isar {
+  IsarCollection<Recommendation> get recommendations => this.collection();
+}
+
+const RecommendationSchema = CollectionSchema(
+  name: r'Recommendation',
+  id: 2320913428743643176,
+  properties: {
+    r'recommendedCity': PropertySchema(
+      id: 0,
+      name: r'recommendedCity',
+      type: IsarType.string,
+    ),
+    r'tag': PropertySchema(
+      id: 1,
+      name: r'tag',
+      type: IsarType.string,
+    ),
+    r'tagline': PropertySchema(
+      id: 2,
+      name: r'tagline',
+      type: IsarType.string,
+    )
+  },
+  estimateSize: _recommendationEstimateSize,
+  serialize: _recommendationSerialize,
+  deserialize: _recommendationDeserialize,
+  deserializeProp: _recommendationDeserializeProp,
+  idName: r'id',
+  indexes: {
+    r'recommendedCity': IndexSchema(
+      id: -8795439796115471701,
+      name: r'recommendedCity',
+      unique: true,
+      replace: true,
+      properties: [
+        IndexPropertySchema(
+          name: r'recommendedCity',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    ),
+    r'tag': IndexSchema(
+      id: -8827799455852696894,
+      name: r'tag',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'tag',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
+  links: {},
+  embeddedSchemas: {},
+  getId: _recommendationGetId,
+  getLinks: _recommendationGetLinks,
+  attach: _recommendationAttach,
+  version: '3.1.0+1',
+);
+
+int _recommendationEstimateSize(
+  Recommendation object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  bytesCount += 3 + object.recommendedCity.length * 3;
+  bytesCount += 3 + object.tag.length * 3;
+  bytesCount += 3 + object.tagline.length * 3;
+  return bytesCount;
+}
+
+void _recommendationSerialize(
+  Recommendation object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeString(offsets[0], object.recommendedCity);
+  writer.writeString(offsets[1], object.tag);
+  writer.writeString(offsets[2], object.tagline);
+}
+
+Recommendation _recommendationDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = Recommendation(
+    recommendedCity: reader.readString(offsets[0]),
+    tag: reader.readString(offsets[1]),
+    tagline: reader.readString(offsets[2]),
+  );
+  object.id = id;
+  return object;
+}
+
+P _recommendationDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readString(offset)) as P;
+    case 1:
+      return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readString(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+Id _recommendationGetId(Recommendation object) {
+  return object.id;
+}
+
+List<IsarLinkBase<dynamic>> _recommendationGetLinks(Recommendation object) {
+  return [];
+}
+
+void _recommendationAttach(
+    IsarCollection<dynamic> col, Id id, Recommendation object) {
+  object.id = id;
+}
+
+extension RecommendationByIndex on IsarCollection<Recommendation> {
+  Future<Recommendation?> getByRecommendedCity(String recommendedCity) {
+    return getByIndex(r'recommendedCity', [recommendedCity]);
+  }
+
+  Recommendation? getByRecommendedCitySync(String recommendedCity) {
+    return getByIndexSync(r'recommendedCity', [recommendedCity]);
+  }
+
+  Future<bool> deleteByRecommendedCity(String recommendedCity) {
+    return deleteByIndex(r'recommendedCity', [recommendedCity]);
+  }
+
+  bool deleteByRecommendedCitySync(String recommendedCity) {
+    return deleteByIndexSync(r'recommendedCity', [recommendedCity]);
+  }
+
+  Future<List<Recommendation?>> getAllByRecommendedCity(
+      List<String> recommendedCityValues) {
+    final values = recommendedCityValues.map((e) => [e]).toList();
+    return getAllByIndex(r'recommendedCity', values);
+  }
+
+  List<Recommendation?> getAllByRecommendedCitySync(
+      List<String> recommendedCityValues) {
+    final values = recommendedCityValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'recommendedCity', values);
+  }
+
+  Future<int> deleteAllByRecommendedCity(List<String> recommendedCityValues) {
+    final values = recommendedCityValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'recommendedCity', values);
+  }
+
+  int deleteAllByRecommendedCitySync(List<String> recommendedCityValues) {
+    final values = recommendedCityValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'recommendedCity', values);
+  }
+
+  Future<Id> putByRecommendedCity(Recommendation object) {
+    return putByIndex(r'recommendedCity', object);
+  }
+
+  Id putByRecommendedCitySync(Recommendation object, {bool saveLinks = true}) {
+    return putByIndexSync(r'recommendedCity', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByRecommendedCity(List<Recommendation> objects) {
+    return putAllByIndex(r'recommendedCity', objects);
+  }
+
+  List<Id> putAllByRecommendedCitySync(List<Recommendation> objects,
+      {bool saveLinks = true}) {
+    return putAllByIndexSync(r'recommendedCity', objects, saveLinks: saveLinks);
+  }
+}
+
+extension RecommendationQueryWhereSort
+    on QueryBuilder<Recommendation, Recommendation, QWhere> {
+  QueryBuilder<Recommendation, Recommendation, QAfterWhere> anyId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+}
+
+extension RecommendationQueryWhere
+    on QueryBuilder<Recommendation, Recommendation, QWhereClause> {
+  QueryBuilder<Recommendation, Recommendation, QAfterWhereClause> idEqualTo(
+      Id id) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: id,
+        upper: id,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterWhereClause> idNotEqualTo(
+      Id id) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            )
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            )
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterWhereClause> idGreaterThan(
+      Id id,
+      {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.greaterThan(lower: id, includeLower: include),
+      );
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterWhereClause> idLessThan(
+      Id id,
+      {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.lessThan(upper: id, includeUpper: include),
+      );
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterWhereClause> idBetween(
+    Id lowerId,
+    Id upperId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: lowerId,
+        includeLower: includeLower,
+        upper: upperId,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterWhereClause>
+      recommendedCityEqualTo(String recommendedCity) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'recommendedCity',
+        value: [recommendedCity],
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterWhereClause>
+      recommendedCityNotEqualTo(String recommendedCity) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'recommendedCity',
+              lower: [],
+              upper: [recommendedCity],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'recommendedCity',
+              lower: [recommendedCity],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'recommendedCity',
+              lower: [recommendedCity],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'recommendedCity',
+              lower: [],
+              upper: [recommendedCity],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterWhereClause> tagEqualTo(
+      String tag) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'tag',
+        value: [tag],
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterWhereClause> tagNotEqualTo(
+      String tag) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'tag',
+              lower: [],
+              upper: [tag],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'tag',
+              lower: [tag],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'tag',
+              lower: [tag],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'tag',
+              lower: [],
+              upper: [tag],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+}
+
+extension RecommendationQueryFilter
+    on QueryBuilder<Recommendation, Recommendation, QFilterCondition> {
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition> idEqualTo(
+      Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      idGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition> idBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      recommendedCityEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'recommendedCity',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      recommendedCityGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'recommendedCity',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      recommendedCityLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'recommendedCity',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      recommendedCityBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'recommendedCity',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      recommendedCityStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'recommendedCity',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      recommendedCityEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'recommendedCity',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      recommendedCityContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'recommendedCity',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      recommendedCityMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'recommendedCity',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      recommendedCityIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'recommendedCity',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      recommendedCityIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'recommendedCity',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      tagEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      tagGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'tag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      tagLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'tag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      tagBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'tag',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      tagStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'tag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      tagEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'tag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      tagContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'tag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      tagMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'tag',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      tagIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tag',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      tagIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'tag',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      taglineEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tagline',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      taglineGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'tagline',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      taglineLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'tagline',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      taglineBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'tagline',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      taglineStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'tagline',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      taglineEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'tagline',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      taglineContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'tagline',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      taglineMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'tagline',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      taglineIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tagline',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterFilterCondition>
+      taglineIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'tagline',
+        value: '',
+      ));
+    });
+  }
+}
+
+extension RecommendationQueryObject
+    on QueryBuilder<Recommendation, Recommendation, QFilterCondition> {}
+
+extension RecommendationQueryLinks
+    on QueryBuilder<Recommendation, Recommendation, QFilterCondition> {}
+
+extension RecommendationQuerySortBy
+    on QueryBuilder<Recommendation, Recommendation, QSortBy> {
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy>
+      sortByRecommendedCity() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'recommendedCity', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy>
+      sortByRecommendedCityDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'recommendedCity', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy> sortByTag() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tag', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy> sortByTagDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tag', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy> sortByTagline() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tagline', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy>
+      sortByTaglineDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tagline', Sort.desc);
+    });
+  }
+}
+
+extension RecommendationQuerySortThenBy
+    on QueryBuilder<Recommendation, Recommendation, QSortThenBy> {
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy> thenById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy> thenByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy>
+      thenByRecommendedCity() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'recommendedCity', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy>
+      thenByRecommendedCityDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'recommendedCity', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy> thenByTag() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tag', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy> thenByTagDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tag', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy> thenByTagline() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tagline', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QAfterSortBy>
+      thenByTaglineDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tagline', Sort.desc);
+    });
+  }
+}
+
+extension RecommendationQueryWhereDistinct
+    on QueryBuilder<Recommendation, Recommendation, QDistinct> {
+  QueryBuilder<Recommendation, Recommendation, QDistinct>
+      distinctByRecommendedCity({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'recommendedCity',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QDistinct> distinctByTag(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'tag', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Recommendation, Recommendation, QDistinct> distinctByTagline(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'tagline', caseSensitive: caseSensitive);
+    });
+  }
+}
+
+extension RecommendationQueryProperty
+    on QueryBuilder<Recommendation, Recommendation, QQueryProperty> {
+  QueryBuilder<Recommendation, int, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Recommendation, String, QQueryOperations>
+      recommendedCityProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'recommendedCity');
+    });
+  }
+
+  QueryBuilder<Recommendation, String, QQueryOperations> tagProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'tag');
+    });
+  }
+
+  QueryBuilder<Recommendation, String, QQueryOperations> taglineProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'tagline');
+    });
+  }
+}

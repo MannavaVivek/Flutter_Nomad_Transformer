@@ -70,7 +70,6 @@ class City {
 
   factory City.fromJson(
       Map<String, dynamic> json, Map<String, dynamic> includes) {
-    // Similar implementation as Country.fromJson
     final fields = json['fields'];
 
     final matchingAsset = includes['Asset'].firstWhere(
@@ -103,5 +102,56 @@ class City {
       imageAssetID: fields['cityPhoto']['sys']['id'],
       imageAssetURL: imageUrl,
     );
+  }
+}
+
+@Collection()
+class Recommendation {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
+  final String recommendedCity;
+
+  final String tagline;
+
+  @Index()
+  final String tag;
+
+  Recommendation({
+    required this.recommendedCity,
+    required this.tagline,
+    required this.tag,
+  });
+
+  // Define the fromJson method
+  factory Recommendation.fromJson(Map<String, dynamic> json) {
+    return Recommendation(
+      recommendedCity: json['recommendedCity'] as String? ?? 'Unknown City',
+      tagline: json['tagline'] as String? ?? 'No tagline available',
+      tag: json['tag'] as String? ?? 'recommendedEntries',
+    );
+  }
+
+  // Method to create a list of Recommendation objects from API response
+  static List<Recommendation> fromApiResponse(
+      Map<String, dynamic> apiResponse) {
+    List<Recommendation> recommendations = [];
+
+    var items = apiResponse['items'] as List;
+    if (items.isNotEmpty) {
+      var fields = items.first['fields'];
+      var recommendedCities = fields['recommendedCities'] as Map;
+
+      recommendedCities.forEach((city, tagline) {
+        recommendations.add(Recommendation(
+            recommendedCity: city,
+            tagline: tagline,
+            tag: 'recommendedEntries'));
+      });
+    } else {
+      throw Exception('Failed to load recommendations');
+    }
+
+    return recommendations;
   }
 }
