@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'country_content_page.dart';
 import 'content_classes.dart';
 import 'package:isar/isar.dart';
@@ -37,38 +35,64 @@ class _HomePageState extends State<HomePage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (snapshot.hasData) {
-            return GridView.builder(
-              itemCount: snapshot.data?.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.0,
-                mainAxisSpacing: 4.0,
-                crossAxisSpacing: 4.0,
-              ),
-              itemBuilder: (BuildContext context, int index) {
-                Country country = snapshot.data![index];
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CountryPage(
-                            countryName: country.name, isar: widget.isar),
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 15), // Horizontal padding
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (var country in snapshot.data!)
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CountryPage(
+                                  countryName: country.name, isar: widget.isar),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 150, // Adjust width to 150px
+                          margin: EdgeInsets.only(
+                              right: 10), // Spacing between tiles
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(
+                                  'https:${country.imageAssetURL}',
+                                  width: 150, // Adjust width to 150px
+                                  height: 150, // Adjust height to 150px
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (BuildContext context,
+                                      Object error, StackTrace? stackTrace) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.purple),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                  height: 10), // Spacing between image and text
+                              Text(
+                                country.name,
+                                style: TextStyle(
+                                    fontFamily:
+                                        'Nunito'), // Adjust text style as needed
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                  child: GridTile(
-                    footer: GridTileBar(
-                      backgroundColor: Colors.black45,
-                      title: Text(country.name),
-                    ),
-                    child: Image.network(
-                      'https:${country.imageAssetURL}',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                );
-              },
+                  ],
+                ),
+              ),
             );
           }
           return const Center(child: Text('No data found'));
@@ -77,94 +101,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showCountryDescription(BuildContext context, String description) {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Country Description'),
-          content: Text(description),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _fetchAndStoreCountries() async {
-    try {
-      final countries = await futureCountries;
-      countriesList.addAll(countries); // Add fetched countries to the list
-    } catch (e) {
-      print('Error fetching and storing countries: $e');
-    }
-  }
-
-  void _loadCountries() {
-    if (countriesList.isEmpty) {
-      _fetchAndStoreCountries();
-    }
-  }
-
   // Function to fetch countries from Contentful
   Future<List<Country>> fetchCountries() async {
-    const String spaceId = 'pqzjijb5vjqz';
-    const String accessToken = 'IVqE-SRtoM5IZ8bTHuf0Cwnx3Jb470uML77gX-2mYwQ';
-    const String environment = 'master';
-    const String contentType = 'country';
-
-    // If not available in Isar, fetch from API
-    try {
-      final response = await http.get(
-        Uri.parse(
-          'https://cdn.contentful.com/spaces/$spaceId/environments/$environment/entries?access_token=$accessToken&metadata.tags.sys.id[all]=$contentType',
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        final includes = jsonResponse['includes'];
-
-        List<dynamic> body = jsonResponse['items'];
-        List<Country> countries = body
-            .map((dynamic item) => Country.fromJson(item, includes))
-            .toList();
-
-        // Save countries to Isar
-        await widget.isar.writeTxn(() async {
-          for (var country in countries) {
-            print('Saving country: ${country.name}');
-            await widget.isar.countrys.put(country);
-          }
-        });
-
-        return countries;
-      } else {
-        print('Response body: ${response.body}');
-        List<Country> cachedCountries =
-            await widget.isar.countrys.where().limit(200).findAll();
-        if (cachedCountries.isNotEmpty) {
-          return cachedCountries;
-        } else {
-          throw Exception('Failed to load countries');
-        }
-      }
-    } catch (e) {
-      print('Error fetching countries: $e');
-      List<Country> cachedCountries =
-          await widget.isar.countrys.where().limit(200).findAll();
-      if (cachedCountries.isNotEmpty) {
-        print(cachedCountries.length);
-        return cachedCountries;
-      } else {
-        throw Exception('Failed to load countries');
-      }
+    List<Country> cachedCountries =
+        await widget.isar.countrys.where().limit(200).findAll();
+    if (cachedCountries.isNotEmpty) {
+      print(cachedCountries.length);
+      return cachedCountries;
+    } else {
+      throw Exception('Failed to load countries');
     }
   }
 }
