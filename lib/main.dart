@@ -204,47 +204,65 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
-      onPopInvoked: (bool didPop) {
-        if (didPop) {
-          return;
-        }
-        _showBackDialog();
-      },
-      child: Scaffold(
-        body: Center(
-          child: _pages.elementAt(_selectedIndex),
-        ),
-        bottomNavigationBar: BottomAppBar(
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 6.0,
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              // Home Button - placed here for symmetry but will be invisible
-              IconButton(
-                  icon: const Icon(Icons.home),
-                  onPressed: () => _onItemTapped(0)),
+        canPop: false,
+        onPopInvoked: (bool didPop) {
+          if (didPop) {
+            return;
+          }
+          _showBackDialog();
+        },
+        child: Scaffold(
+            body: Center(
+              child: _pages.elementAt(_selectedIndex),
+            ),
+            bottomNavigationBar: SizedBox(
+              child: Container(
+                width: double.infinity,
+                constraints: const BoxConstraints(
+                  maxWidth: 600.0,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    // Home Button
+                    IconButton(
+                      iconSize: 24.0, // Smaller icons
+                      padding: EdgeInsets
+                          .zero, // Removes default padding around the icon
+                      icon: const Icon(Icons.home),
+                      onPressed: () => _onItemTapped(0),
+                    ),
 
-              // Search Button
-              IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () => _onItemTapped(1)),
+                    // Search Button
+                    IconButton(
+                      iconSize: 24.0, // Smaller icons
+                      padding: EdgeInsets
+                          .zero, // Removes default padding around the icon
+                      icon: const Icon(Icons.search),
+                      onPressed: () => _onItemTapped(1),
+                    ),
 
-              // Favorites Button
-              IconButton(
-                  icon: const Icon(Icons.star),
-                  onPressed: () => _onItemTapped(2)),
+                    // Favorites Button
+                    IconButton(
+                      iconSize: 24.0, // Smaller icons
+                      padding: EdgeInsets
+                          .zero, // Removes default padding around the icon
+                      icon: const Icon(Icons.favorite_border),
+                      onPressed: () => _onItemTapped(2),
+                    ),
 
-              // User Button
-              IconButton(
-                  icon: const Icon(Icons.person),
-                  onPressed: () => _onItemTapped(3)),
-            ],
-          ),
-        ),
-      ),
-    );
+                    // User Button
+                    IconButton(
+                      iconSize: 24.0, // Smaller icons
+                      padding: EdgeInsets
+                          .zero, // Removes default padding around the icon
+                      icon: const Icon(Icons.person),
+                      onPressed: () => _onItemTapped(3),
+                    ),
+                  ],
+                ),
+              ),
+            )));
   }
 }
