@@ -3,12 +3,13 @@ import 'content_classes.dart';
 import 'package:isar/isar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+// TODO: Sync tiles with images, so both load at the same time
 class CountryPage extends StatefulWidget {
   final Isar isar;
   final String countryName;
   final String countryDescription; // New parameter for country description
 
-  CountryPage({
+  const CountryPage({
     Key? key,
     required this.countryName,
     required this.isar,
@@ -32,121 +33,141 @@ class CountryPageState extends State<CountryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.countryName)),
-      body: FutureBuilder<List<City>>(
-        future: futureCities,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(widget
-                      .countryDescription), // Display the passed country description
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: snapshot.data?.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      City city = snapshot.data![index];
-                      bool isFavorite = favoriteCities[city.name] ?? false;
-                      return Container(
-                        margin: const EdgeInsets.all(10),
-                        height: 200, // Tile height
-                        width: 300, // Tile width
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 5,
-                              blurRadius: 7,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: CachedNetworkImage(
-                                imageUrl: 'https:${city.imageAssetURL}',
-                                width: double.infinity, // Image width
-                                height: 200, // Image height
-                                fit: BoxFit.cover,
-                                errorWidget: (context, url, error) =>
-                                    const Center(child: Icon(Icons.error)),
+      body: SafeArea(
+        child: FutureBuilder<List<City>>(
+          future: futureCities,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (snapshot.hasData) {
+              return CustomScrollView(
+                slivers: [
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 10), // Padding after the list
+                  ),
+                  SliverAppBar(
+                    expandedHeight: 60.0,
+                    floating: false,
+                    pinned: false,
+                    title: Text(widget.countryName),
+                    automaticallyImplyLeading: false,
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 25.0),
+                      child: Text(widget.countryDescription),
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        City city = snapshot.data![index];
+                        bool isFavorite = favoriteCities[city.name] ?? false;
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 25),
+                          height: 200, // Tile height
+                          width: 300, // Tile width
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 5,
+                                blurRadius: 7,
+                                offset: const Offset(0, 3),
                               ),
-                            ),
-                            Positioned(
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.only(
-                                    bottomLeft: Radius.circular(10),
-                                    bottomRight: Radius.circular(10),
-                                  ),
-                                  child: Container(
-                                    height: 50,
-                                    decoration: const BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          Colors
-                                              .transparent, // Top of the gradient is transparent
-                                          Colors
-                                              .grey, // Bottom of the gradient is white
-                                        ],
+                            ],
+                          ),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: CachedNetworkImage(
+                                  imageUrl: 'https:${city.imageAssetURL}',
+                                  width: double.infinity, // Image width
+                                  height: 200, // Image height
+                                  fit: BoxFit.cover,
+                                  errorWidget: (context, url, error) =>
+                                      const Center(child: Icon(Icons.error)),
+                                ),
+                              ),
+                              Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.only(
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight: Radius.circular(10),
+                                    ),
+                                    child: Container(
+                                      height: 50,
+                                      decoration: const BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            Colors
+                                                .transparent, // Top of the gradient is transparent
+                                            Colors
+                                                .grey, // Bottom of the gradient is white
+                                          ],
+                                        ),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        city.name,
+                                        style: const TextStyle(
+                                            fontFamily: 'Nunito',
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors
+                                                .white), // Adjust text style as needed
                                       ),
                                     ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      city.name,
-                                      style: const TextStyle(
-                                          fontFamily: 'Nunito',
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors
-                                              .white), // Adjust text style as needed
-                                    ),
+                                  )),
+                              Positioned(
+                                top: 130, // Position where image and text meet
+                                right: 15,
+                                child: FloatingActionButton(
+                                  heroTag: city.name,
+                                  mini: true,
+                                  shape: const CircleBorder(),
+                                  backgroundColor: Colors.white,
+                                  child: Icon(
+                                    Icons.favorite,
+                                    color:
+                                        isFavorite ? Colors.red : Colors.grey,
                                   ),
-                                )),
-                            Positioned(
-                              top: 130, // Position where image and text meet
-                              right: 15,
-                              child: FloatingActionButton(
-                                mini: true,
-                                shape: const CircleBorder(),
-                                backgroundColor: Colors.white,
-                                child: Icon(
-                                  Icons.favorite,
-                                  color: isFavorite ? Colors.red : Colors.grey,
+                                  onPressed: () {
+                                    setState(() {
+                                      favoriteCities[city.name] = !isFavorite;
+                                    });
+                                  },
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    favoriteCities[city.name] = !isFavorite;
-                                  });
-                                },
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                            ],
+                          ),
+                        );
+                      },
+                      childCount: snapshot.data!.length,
+                    ),
                   ),
-                )
-              ],
-            );
-          }
-          return const Center(child: Text('No data found'));
-        },
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 30), // Padding after the list
+                  ),
+                ],
+              );
+            } else {
+              return const Center(child: Text('No data found'));
+            }
+          },
+        ),
       ),
     );
   }
