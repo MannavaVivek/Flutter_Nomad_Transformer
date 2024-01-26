@@ -9,9 +9,14 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // Initialize Isar
   final dir = await getApplicationDocumentsDirectory();

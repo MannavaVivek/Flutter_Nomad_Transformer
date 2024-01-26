@@ -1,4 +1,4 @@
-package com.example.nomad_transformer
+package com.gaaliputra.nomad_transformer
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "54347799928",
+    "project_id": "nomad-transformer-user-data",
+    "storage_bucket": "nomad-transformer-user-data.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:54347799928:android:842860eae052c165c83c8d",
+        "android_client_info": {
+          "package_name": "com.gaaliputra.nomad_transformer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_H9xgEpY4BagYes9R4ssexlnaomxoNiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
