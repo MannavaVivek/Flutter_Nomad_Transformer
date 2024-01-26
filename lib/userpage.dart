@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:isar/isar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'content_classes.dart';
 
 class UserPage extends StatefulWidget {
   final Isar isar;
@@ -232,15 +234,49 @@ class UserPageState extends State<UserPage> {
 
   Future<void> _loginUser(
       String email, String password, BuildContext context) async {
+    bool loginSuccessful = false;
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       Navigator.of(context).pop(); // Close the dialog
       setState(() {}); // Update UI
+      loginSuccessful = true;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to login: $e')),
       );
+    }
+
+    if (loginSuccessful) {
+      try {
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          DocumentSnapshot snapshot = await FirebaseFirestore.instance
+              .collection('UserFavorites')
+              .doc(user.uid)
+              .get();
+
+          if (snapshot.exists) {
+            print('User favorites found in Firestore');
+            List<String> favBlogPosts =
+                List<String>.from(snapshot['favBlogPosts'] ?? []);
+
+            print('User favorites: $favBlogPosts');
+
+            // Create a new UserFavorites object with data from Firestore
+            UserFavorites userFavorites =
+                UserFavorites(userId: user.uid, favBlogPosts: favBlogPosts);
+
+            // Write to Isar database
+            await widget.isar.writeTxn(() async {
+              await widget.isar.userFavorites.put(userFavorites);
+            });
+          }
+        }
+      } catch (e) {
+        print('Error fetching from Firestore and updating Isar: $e');
+        // Handle any errors here
+      }
     }
   }
 
@@ -352,6 +388,24 @@ class UserPageState extends State<UserPage> {
         });
       },
     );
+
+    if (signUpSuccessful) {
+      try {
+        // Assume that user registration is successful and we have the user ID
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          // Create a entry in the UserFavorites collection in Isar
+          UserFavorites userFavorites =
+              UserFavorites(userId: user.uid, favBlogPosts: <String>[]);
+          await widget.isar.writeTxn(() async {
+            await widget.isar.userFavorites.put(userFavorites);
+          });
+        }
+      } catch (e) {
+        print('Error setting up user favorites: $e');
+        // Handle any errors here
+      }
+    }
     return signUpSuccessful;
   }
 }

@@ -155,3 +155,14 @@ class Recommendation {
     return recommendations;
   }
 }
+
+@Collection()
+class UserFavorites {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
+  late String userId;
+  late List<String> favBlogPosts;
+
+  UserFavorites({required this.userId, required this.favBlogPosts});
+}

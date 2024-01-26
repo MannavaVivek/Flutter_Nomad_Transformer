@@ -21,7 +21,7 @@ void main() async {
   // Initialize Isar
   final dir = await getApplicationDocumentsDirectory();
   final isar = await Isar.open(
-    [CountrySchema, CitySchema, RecommendationSchema],
+    [CountrySchema, CitySchema, RecommendationSchema, UserFavoritesSchema],
     directory: dir.path,
   );
 
@@ -197,6 +197,20 @@ class _MainScreenState extends State<MainScreen> {
       }
     } catch (e) {
       throw Exception('Failed to load content');
+    }
+
+    //check if user has favorites
+    try {
+      await widget.isar.userFavorites
+          .where()
+          .userIdEqualTo("Guest")
+          .findFirst();
+    } catch (e) {
+      //if not, create a new userFavorites object
+      await widget.isar.writeTxn(() async {
+        await widget.isar.userFavorites
+            .put(UserFavorites(userId: "Guest", favBlogPosts: []));
+      });
     }
   }
 
