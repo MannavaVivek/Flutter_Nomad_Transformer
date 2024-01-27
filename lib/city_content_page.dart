@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+//TODO: Update the Firebase cloudstore api to the latest version
 class CityDetailsPage extends StatefulWidget {
   final String cityName;
   final Isar isar;
@@ -129,16 +130,17 @@ class _CityDetailsPageState extends State<CityDetailsPage> {
             ),
           ),
           floatingActionButton: FloatingActionButton(
+            splashColor: Colors.red,
             onPressed: () {
               setState(() {
                 isFavorite = !isFavorite;
               });
               toggleFavorite(widget.cityName, isFavorite);
             },
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.white,
             child: Icon(
               isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: Colors.white,
+              color: Colors.red,
             ),
           )),
     );

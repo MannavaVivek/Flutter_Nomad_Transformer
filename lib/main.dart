@@ -31,7 +31,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   final Isar isar;
 
-  const MyApp({required this.isar});
+  const MyApp({super.key, required this.isar});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
 class MainScreen extends StatefulWidget {
   final Isar isar;
 
-  MainScreen({required this.isar});
+  const MainScreen({super.key, required this.isar});
 
   @override
   _MainScreenState createState() => _MainScreenState();
