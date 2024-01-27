@@ -123,24 +123,37 @@ class UserPageState extends State<UserPage> {
   }
 
   Widget _buildGuestView(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const CircleAvatar(
-            radius: 75,
-            backgroundImage: AssetImage('assets/user_image.png'),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints viewportConstraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: viewportConstraints.maxHeight,
+            ),
+            child: IntrinsicHeight(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const CircleAvatar(
+                      radius: 75,
+                      backgroundImage: AssetImage('assets/user_image.png'),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Currently using as Guest',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 30),
+                    _buildLoginButton(context),
+                    _buildSignUpLink(context),
+                  ],
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 16),
-          const Text(
-            'Currently using as Guest',
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 30),
-          _buildLoginButton(context),
-          _buildSignUpLink(context),
-        ],
-      ),
+        );
+      },
     );
   }
 
