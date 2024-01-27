@@ -3,6 +3,7 @@ import 'country_content_page.dart';
 import 'content_classes.dart';
 import 'package:isar/isar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'city_content_page.dart';
 
 // HomePage widget
 class HomePage extends StatefulWidget {
@@ -63,7 +64,8 @@ class HomePageState extends State<HomePage> {
           const SliverAppBar(
             floating: false,
             pinned: false,
-            title: Text("World Travel Guide"),
+            title: Text("World Travel Guide",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           ),
           SliverToBoxAdapter(
             child: FutureBuilder<List<Country>>(
@@ -194,63 +196,77 @@ class HomePageState extends State<HomePage> {
         }
 
         City city = snapshot.data!.first;
-        return Container(
-          width: double.infinity,
-          height: 150,
-          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            image: DecorationImage(
-              image: CachedNetworkImageProvider('https:${city.imageAssetURL}'),
-              fit: BoxFit.cover,
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CityDetailsPage(
+                  cityName: city.name,
+                  isar: widget.isar,
+                ),
+              ),
+            );
+          },
+          child: Container(
+            width: double.infinity,
+            height: 150,
+            margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              image: DecorationImage(
+                image:
+                    CachedNetworkImageProvider('https:${city.imageAssetURL}'),
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
-                    ),
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.black.withOpacity(0.5),
-                        Colors.transparent,
-                      ],
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: Radius.circular(10),
+                      ),
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          Colors.black.withOpacity(0.5),
+                          Colors.transparent,
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      recommendation.recommendedCity,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        recommendation.recommendedCity,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    Text(
-                      recommendation.tagline,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ],
+                      Text(
+                        recommendation.tagline,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

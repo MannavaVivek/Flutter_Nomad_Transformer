@@ -89,8 +89,9 @@ class City {
       fields['cityName'] = 'No city name';
     } else if (fields['countryName'] == null) {
       fields['countryName'] = 'No country name';
-    } else if (fields['cityDescription'] == null) {
-      fields['cityDescription'] = 'No city description';
+    } else if (fields['blogContent'] == null) {
+      print('No city description from Contentful');
+      fields['blogContent'] = 'No City description';
     } else if (fields['cityPhoto'] == null) {
       fields['cityPhoto'] = 'No city photo';
     }
@@ -98,7 +99,7 @@ class City {
     return City(
       name: fields['cityName'],
       countryName: fields['countryName'],
-      description: fields['cityDescription'],
+      description: fields['blogContent'],
       imageAssetID: fields['cityPhoto']['sys']['id'],
       imageAssetURL: imageUrl,
     );
