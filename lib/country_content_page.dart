@@ -72,7 +72,6 @@ class CountryPageState extends State<CountryPage> {
                       child: SizedBox(height: 10), // Padding after the list
                     ),
                     SliverAppBar(
-                      expandedHeight: 60.0,
                       floating: false,
                       pinned: false,
                       title: Text(widget.countryName),
