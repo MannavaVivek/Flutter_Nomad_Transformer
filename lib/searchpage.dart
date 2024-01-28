@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'content_classes.dart';
+import 'city_content_page.dart';
 
 class SearchPage extends StatefulWidget {
   final Isar isar;
@@ -8,10 +9,10 @@ class SearchPage extends StatefulWidget {
   const SearchPage({Key? key, required this.isar}) : super(key: key);
 
   @override
-  _SearchPageState createState() => _SearchPageState();
+  SearchPageState createState() => SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   Future<List<City>>? _searchResults;
 
@@ -110,7 +111,15 @@ class _SearchPageState extends State<SearchPage> {
                               horizontal: 35.0, vertical: 0.0),
                           title: Text(city.name),
                           onTap: () {
-                            print('Tapped ${city.name}');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CityDetailsPage(
+                                  cityName: city.name,
+                                  isar: widget.isar,
+                                ),
+                              ),
+                            );
                           },
                         );
                       },

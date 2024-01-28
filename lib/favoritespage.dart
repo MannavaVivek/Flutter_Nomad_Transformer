@@ -76,7 +76,9 @@ class FavoritesPageState extends State<FavoritesPage> {
           child: FutureBuilder<List<City>>(
             future: futureFavorites,
             builder: (context, snapshot) {
-              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox.shrink();
+              } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 print('Favorite cities: $favoriteCities');
                 return ListView.builder(
                   itemCount: favoriteCities.length,
