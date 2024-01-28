@@ -76,7 +76,8 @@ class FavoritesPageState extends State<FavoritesPage> {
           child: FutureBuilder<List<City>>(
             future: futureFavorites,
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
+              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                print('Favorite cities: $favoriteCities');
                 return ListView.builder(
                   itemCount: favoriteCities.length,
                   itemBuilder: (context, index) {
@@ -189,6 +190,36 @@ class FavoritesPageState extends State<FavoritesPage> {
                 );
               } else if (snapshot.hasError) {
                 return Text('${snapshot.error}');
+              } else if (snapshot.connectionState == ConnectionState.done &&
+                      snapshot.data!.isEmpty ||
+                  snapshot.data == null) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize:
+                          MainAxisSize.min, // To keep the column content tight
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/void.png',
+                          width: 200.0, // Image width
+                          height: 200.0, // Image height
+                        ),
+                        const SizedBox(
+                            height: 10), // Space between image and text
+                        const Text(
+                          "Avoid the void. Click hearts for favorites!",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15.0, // Adjust font size as needed
+                            fontWeight: FontWeight.bold,
+                            // Any other text style properties
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               }
               return const CircularProgressIndicator();
             },

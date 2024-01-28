@@ -237,7 +237,7 @@ class HomePageState extends State<HomePage> {
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                         colors: [
-                          Colors.black.withOpacity(0.5),
+                          Colors.black.withOpacity(0.65),
                           Colors.transparent,
                         ],
                       ),

@@ -75,6 +75,7 @@ flutter:
   assets:
     - assets/user_image.png
     - assets/programmer.png
+    - assets/void.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
