@@ -15,8 +15,25 @@ class UserPage extends StatefulWidget {
 
 class UserPageState extends State<UserPage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
-  String _email = '';
-  String _password = '';
+  String email = '';
+  String password = '';
+  String confirmPassword = '';
+  String errorMessage = '';
+
+  bool _isLogin = true; // Flag to switch between login and sign-up
+
+  // Helper methods for toggling between login and sign-up
+  void _toggleLogin() {
+    setState(() {
+      _isLogin = true;
+    });
+  }
+
+  void _toggleSignUp() {
+    setState(() {
+      _isLogin = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +66,7 @@ class UserPageState extends State<UserPage> {
           _buildActionContainer(context),
           const SizedBox(height: 100),
           const Text('Ver. 0.0.7'),
-          _buildSignOutButton(context),
+          _buildSignOutButton(),
           const SizedBox(height: 16),
         ],
       ),
@@ -123,302 +140,298 @@ class UserPageState extends State<UserPage> {
   }
 
   Widget _buildGuestView(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints viewportConstraints) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: viewportConstraints.maxHeight,
-            ),
-            child: IntrinsicHeight(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const CircleAvatar(
-                      radius: 75,
-                      backgroundImage: AssetImage('assets/user_image.png'),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Currently using as Guest',
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 30),
-                    _buildLoginButton(context),
-                    _buildSignUpLink(context),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildLoginButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () => _showLoginDialog(context),
-      child: const Text('Login'),
-    );
-  }
-
-  Widget _buildSignOutButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () => _signOut(context),
-      child: const Text('Sign Out'),
-    );
-  }
-
-  Widget _buildSignUpLink(BuildContext context) {
-    return TextButton(
-      onPressed: () async {
-        bool signUpSuccessful = await _showSignUpDialog(context);
-        if (signUpSuccessful) {
-          setState(() {});
-        }
-      },
-      child: const Text('Sign Up'),
-    );
-  }
-
-  Future<void> _signOut(BuildContext context) async {
-    try {
-      await auth.signOut();
-      setState(() {}); // Refresh UI after sign out
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to sign out: $e')),
-      );
-    }
-  }
-
-  void _showLoginDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible:
-          false, // Set to true if you want the dialog to be dismissible
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Login'),
-          content: SingleChildScrollView(
-            child: ListBody(
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  onChanged: (value) {
-                    _email = value;
-                  },
+                const CircleAvatar(
+                  radius: 75,
+                  backgroundImage: AssetImage('assets/user_image.png'),
                 ),
-                TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                  ),
-                  obscureText: true,
-                  onChanged: (value) {
-                    _password = value;
-                  },
+                const SizedBox(height: 16),
+                _isLogin ? _buildLoginForm() : _buildSignUpForm(),
+                TextButton(
+                  onPressed: _isLogin ? _toggleSignUp : _toggleLogin,
+                  child: Text(_isLogin
+                      ? 'New to the app? Register'
+                      : 'Already signed up? Log in'),
                 ),
               ],
             ),
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Login'),
-              onPressed: () {
-                _loginUser(_email, _password, context);
-              },
-            ),
-          ],
-        );
-      },
+        ),
+      ),
     );
   }
 
-  Future<void> _loginUser(
-      String email, String password, BuildContext context) async {
-    bool loginSuccessful = false;
+  Widget _buildLoginForm() {
+    return Column(
+      children: <Widget>[
+        TextField(
+          decoration: InputDecoration(
+            labelText: 'Email',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.blue),
+            ),
+          ),
+          keyboardType: TextInputType.emailAddress,
+          onChanged: (value) => email = value,
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+            labelText: 'Password',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.blue),
+            ),
+          ),
+          obscureText: true,
+          onChanged: (value) => password = value,
+        ),
+        const SizedBox(height: 30),
+        ElevatedButton(
+          onPressed: () => _loginUser(email, password),
+          child: const Text('Login'),
+        ),
+        // TODO: Add forgot password functionality
+      ],
+    );
+  }
+
+  Widget _buildSignOutButton() {
+    return ElevatedButton(
+      onPressed: _signOut,
+      child: const Text('Sign Out'),
+    );
+  }
+
+  Future<void> _signOut() async {
+    try {
+      await auth.signOut();
+      email = '';
+      password = '';
+      confirmPassword = '';
+      errorMessage = '';
+      setState(() {}); // Refresh UI after sign out
+    } catch (e) {
+      _handleSignOutError(e);
+    }
+  }
+
+  void _handleSignOutError(dynamic error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to sign out: ${error.toString()}')),
+    );
+  }
+
+  Future<void> _loginUser(String email, String password) async {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      Navigator.of(context).pop(); // Close the dialog
-      setState(() {}); // Update UI
-      loginSuccessful = true;
+      setState(() {}); // Update UI for logged in user view
+
+      // Fetch user favorites and update local database if login is successful
+      await _updateUserFavorites();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to login: $e')),
-      );
-    }
-
-    if (loginSuccessful) {
-      try {
-        User? user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          DocumentSnapshot snapshot = await FirebaseFirestore.instance
-              .collection('UserFavorites')
-              .doc(user.uid)
-              .get();
-
-          if (snapshot.exists) {
-            print('User favorites found in Firestore');
-            List<String> favBlogPosts =
-                List<String>.from(snapshot['favBlogPosts'] ?? []);
-
-            print('User favorites: $favBlogPosts');
-
-            // Create a new UserFavorites object with data from Firestore
-            UserFavorites userFavorites =
-                UserFavorites(userId: user.uid, favBlogPosts: favBlogPosts);
-
-            // Write to Isar database
-            await widget.isar.writeTxn(() async {
-              await widget.isar.userFavorites.put(userFavorites);
-            });
-          }
-        }
-      } catch (e) {
-        print('Error fetching from Firestore and updating Isar: $e');
-        // Handle any errors here
-      }
+      _handleLoginError(e);
     }
   }
 
-  Future<bool> _showSignUpDialog(BuildContext context) async {
-    String email = '';
-    String password = '';
-    String confirmPassword = '';
-    String errorMessage = '';
+  Future<void> _updateUserFavorites() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DocumentSnapshot snapshot = await FirebaseFirestore.instance
+            .collection('UserFavorites')
+            .doc(user.uid)
+            .get();
 
-    bool signUpSuccessful = await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-          return AlertDialog(
-            title: const Text('Sign Up'),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  errorMessage.isNotEmpty
-                      ? Text(errorMessage,
-                          style: const TextStyle(color: Colors.red))
-                      : Container(),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      errorText: email.isNotEmpty &&
-                              !RegExp(r"^[a-zA-Z0-9._]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                  .hasMatch(email)
-                          ? 'Invalid email format'
-                          : null,
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                    onChanged: (value) {
-                      email = value;
-                    },
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      errorText: password.isNotEmpty && password.length < 8
-                          ? 'Password must be at least 8 characters'
-                          : null,
-                    ),
-                    obscureText: true,
-                    onChanged: (value) {
-                      password = value;
-                    },
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Confirm Password',
-                      errorText: confirmPassword.isNotEmpty &&
-                              password != confirmPassword
-                          ? 'Passwords do not match'
-                          : null,
-                    ),
-                    obscureText: true,
-                    onChanged: (value) {
-                      confirmPassword = value;
-                    },
-                  ),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text('Sign Up'),
-                onPressed: () async {
-                  if (email.isEmpty ||
-                      password.isEmpty ||
-                      confirmPassword.isEmpty ||
-                      password.length < 8 ||
-                      password != confirmPassword ||
-                      !RegExp(r"^[a-zA-Z0-9._]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                          .hasMatch(email)) {
-                    errorMessage = 'Please fill in all fields correctly';
-                  } else {
-                    try {
-                      await FirebaseAuth.instance
-                          .createUserWithEmailAndPassword(
-                              email: email, password: password);
-
-                      Navigator.of(context).pop(true);
-                    } catch (e) {
-                      if (e is FirebaseAuthException) {
-                        if (e.code == 'email-already-in-use') {
-                          errorMessage = 'User email already exists';
-                        } else {
-                          errorMessage = 'Failed to create user: ${e.message}';
-                        }
-                      } else {
-                        errorMessage = 'An unknown error occurred';
-                      }
-                      setState(() {}); // Update UI
-                    }
-                  }
-                },
-              ),
-            ],
-          );
-        });
-      },
-    );
-
-    if (signUpSuccessful) {
-      try {
-        // Assume that user registration is successful and we have the user ID
-        User? user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          // Create a entry in the UserFavorites collection in Isar
+        if (snapshot.exists) {
+          List<String> favBlogPosts =
+              List<String>.from(snapshot['favBlogPosts'] ?? []);
           UserFavorites userFavorites =
-              UserFavorites(userId: user.uid, favBlogPosts: <String>[]);
+              UserFavorites(userId: user.uid, favBlogPosts: favBlogPosts);
+
+          // Write to Isar database
           await widget.isar.writeTxn(() async {
             await widget.isar.userFavorites.put(userFavorites);
           });
         }
-      } catch (e) {
-        print('Error setting up user favorites: $e');
-        // Handle any errors here
+      }
+    } catch (e) {
+      // Handle any errors here
+    }
+  }
+
+  void _handleLoginError(dynamic error) {
+    String errorMessage;
+
+    if (error is FirebaseAuthException) {
+      switch (error.code) {
+        case 'user-not-found':
+        case 'invalid-email':
+          errorMessage = 'Invalid email. Please try again.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password. Please try again.';
+          break;
+        case 'user-disabled':
+          errorMessage = 'User is disabled. Please contact support.';
+          break;
+        case 'invalid-credential':
+          errorMessage = 'Invalid credentials. Please try again.';
+          break;
+        case 'too-many-requests':
+          errorMessage =
+              'Too many requests. Please wait a while before trying again.';
+          break;
+        default:
+          errorMessage = 'An error occurred during login. Please try again.';
+      }
+    } else {
+      errorMessage = 'An unknown error occurred.';
+    }
+
+    // Display the error message using the current BuildContext
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(errorMessage)),
+    );
+  }
+
+  Widget _buildSignUpForm() {
+    return Column(
+      children: <Widget>[
+        if (errorMessage.isNotEmpty)
+          Text(errorMessage, style: const TextStyle(color: Colors.red)),
+        TextField(
+          decoration: InputDecoration(
+            labelText: 'Email',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.blue),
+            ),
+          ),
+          keyboardType: TextInputType.emailAddress,
+          onChanged: (value) {
+            email = value;
+          },
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+            labelText: 'Password',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.blue),
+            ),
+          ),
+          obscureText: true,
+          onChanged: (value) {
+            password = value;
+          },
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+            labelText: 'Confirm Password',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.blue),
+            ),
+          ),
+          obscureText: true,
+          onChanged: (value) {
+            confirmPassword = value;
+          },
+        ),
+        const SizedBox(height: 30),
+        ElevatedButton(
+          onPressed: _signUpUser,
+          child: const Text('Sign Up'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _signUpUser() async {
+    // Clear previous error message
+    setState(() {
+      errorMessage = '';
+    });
+
+    // Validation
+    if (email.isEmpty ||
+        !RegExp(r"^[a-zA-Z0-9._]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email)) {
+      setState(() => errorMessage = 'Invalid email format');
+      return;
+    }
+    if (password.isEmpty || password.length < 8) {
+      setState(() => errorMessage = 'Password must be at least 8 characters');
+      return;
+    }
+    if (confirmPassword.isEmpty || password != confirmPassword) {
+      setState(() => errorMessage = 'Passwords do not match');
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      // Handle successful sign up, such as navigating to another page
+      setState(() {}); // Update UI for logged in user view
+    } catch (e) {
+      if (e is FirebaseAuthException) {
+        setState(() {
+          errorMessage = e.code == 'email-already-in-use'
+              ? 'User email already exists'
+              : 'Failed to create user: ${e.message}';
+        });
+      } else {
+        setState(() {
+          errorMessage = 'An unknown error occurred';
+        });
       }
     }
-    return signUpSuccessful;
   }
 }
