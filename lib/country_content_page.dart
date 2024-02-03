@@ -7,7 +7,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'city_content_page.dart';
 import 'package:logger/logger.dart';
 
-// TODO: Sync tiles with images, so both load at the same time
 class CountryPage extends StatefulWidget {
   final Isar isar;
   final Logger logger;

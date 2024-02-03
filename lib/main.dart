@@ -59,7 +59,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-//TODO: Add isar close in dispose
 class MainScreen extends StatefulWidget {
   final Isar isar;
   final Logger logger;
@@ -231,6 +230,13 @@ class MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _fetchContent(widget.isar, widget.logger);
+  }
+
+  @override
+  void dispose() {
+    // Close the Isar instance when the widget is disposed
+    widget.isar.close();
+    super.dispose();
   }
 
   @override

@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 
-//TODO: Update the Firebase cloudstore api to the latest version
 class CityDetailsPage extends StatefulWidget {
   final String cityName;
   final Isar isar;
@@ -20,10 +19,10 @@ class CityDetailsPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _CityDetailsPageState createState() => _CityDetailsPageState();
+  CityDetailsPageState createState() => CityDetailsPageState();
 }
 
-class _CityDetailsPageState extends State<CityDetailsPage> {
+class CityDetailsPageState extends State<CityDetailsPage> {
   late Future<City?> futureCity;
   bool isFavorite = false;
 
@@ -150,7 +149,7 @@ class _CityDetailsPageState extends State<CityDetailsPage> {
   }
 
   Future<void> updateFirestoreFavorites() async {
-    print('Updating favorites in Firestore');
+    widget.logger.d('Updating favorites in Firestore');
     try {
       // Fetch the user's favorite blog posts from Isar
       final userId = FirebaseAuth.instance.currentUser?.uid ?? 'Guest';
