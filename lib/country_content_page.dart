@@ -5,10 +5,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'city_content_page.dart';
+import 'package:logger/logger.dart';
 
 // TODO: Sync tiles with images, so both load at the same time
 class CountryPage extends StatefulWidget {
   final Isar isar;
+  final Logger logger;
   final String countryName;
   final String countryDescription; // New parameter for country description
 
@@ -16,6 +18,7 @@ class CountryPage extends StatefulWidget {
     Key? key,
     required this.countryName,
     required this.isar,
+    required this.logger,
     required this.countryDescription, // Initialize the new parameter
   }) : super(key: key);
 
@@ -100,6 +103,7 @@ class CountryPageState extends State<CountryPage> {
                                   builder: (context) => CityDetailsPage(
                                     cityName: city.name,
                                     isar: widget.isar,
+                                    logger: widget.logger,
                                   ),
                                 ),
                               ).then((value) => setState(() {

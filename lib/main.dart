@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'HomePage.dart'; // Import your pages
+import 'HomePage.dart';
 import 'SearchPage.dart';
 import 'FavoritesPage.dart';
 import 'UserPage.dart';
@@ -11,8 +11,20 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'logger_config.dart';
+import 'package:logger/logger.dart';
 
 void main() async {
+  // Determine if the app is running in debug mode
+  bool isDebug = false;
+  assert(() {
+    isDebug = true;
+    return true;
+  }());
+
+  final logger = LoggerConfig.getLogger(isDebug: isDebug);
+  logger.d('Logger is configured');
+
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -25,13 +37,14 @@ void main() async {
     directory: dir.path,
   );
 
-  runApp(MyApp(isar: isar));
+  runApp(MyApp(isar: isar, logger: logger));
 }
 
 class MyApp extends StatelessWidget {
   final Isar isar;
+  final Logger logger;
 
-  const MyApp({super.key, required this.isar});
+  const MyApp({super.key, required this.isar, required this.logger});
 
   @override
   Widget build(BuildContext context) {
@@ -40,29 +53,30 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       home: MainScreen(
         isar: isar,
+        logger: logger,
       ),
     );
   }
 }
 
 //TODO: Add isar close in dispose
-//TODO: Add logger if print statements are really necessary
 class MainScreen extends StatefulWidget {
   final Isar isar;
+  final Logger logger;
 
-  const MainScreen({super.key, required this.isar});
+  const MainScreen({super.key, required this.isar, required this.logger});
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  MainScreenState createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   late final List<Widget> _pages = [
-    HomePage(isar: widget.isar),
-    SearchPage(isar: widget.isar),
-    FavoritesPage(isar: widget.isar),
-    UserPage(isar: widget.isar)
+    HomePage(isar: widget.isar, logger: widget.logger),
+    SearchPage(isar: widget.isar, logger: widget.logger),
+    FavoritesPage(isar: widget.isar, logger: widget.logger),
+    UserPage(isar: widget.isar, logger: widget.logger)
   ];
 
   void _onItemTapped(int index) {
@@ -106,7 +120,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Future<void> _fetchContent(Isar isar) async {
+  Future<void> _fetchContent(Isar isar, Logger logger) async {
     const String spaceID = 'pqzjijb5vjqz';
     const String accessToken = 'IVqE-SRtoM5IZ8bTHuf0Cwnx3Jb470uML77gX-2mYwQ';
     const String environment = 'master';
@@ -139,12 +153,11 @@ class _MainScreenState extends State<MainScreen> {
         List<Country> cachedCountries =
             await widget.isar.countrys.where().findAll();
         if (cachedCountries.isNotEmpty) {
-          print('Main - API Error - Fetched countries from Isar');
+          logger.d('Main - API Error - Fetched countries from Isar');
         } else {
           throw Exception('Failed to load countries');
         }
       }
-      //TODO: Deal with city cache not being available. Right now working on assumption that if countries are cached, cities are cached too
 
       // Fetch cities
       for (var countryItem in countriesList) {
@@ -171,7 +184,7 @@ class _MainScreenState extends State<MainScreen> {
           });
         }
       }
-      print('Main - API Success - Fetched countries and cities from API');
+      widget.logger.d('Main API Success - Fetched content from API');
       // Fetch recommendations
       const String recommendationContentType = 'recommendedReads';
       final recommendationResponse = await http.get(
@@ -217,7 +230,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchContent(widget.isar);
+    _fetchContent(widget.isar, widget.logger);
   }
 
   @override

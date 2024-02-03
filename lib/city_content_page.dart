@@ -4,16 +4,19 @@ import 'package:isar/isar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:logger/logger.dart';
 
 //TODO: Update the Firebase cloudstore api to the latest version
 class CityDetailsPage extends StatefulWidget {
   final String cityName;
   final Isar isar;
+  final Logger logger;
 
   const CityDetailsPage({
     Key? key,
     required this.cityName,
     required this.isar,
+    required this.logger,
   }) : super(key: key);
 
   @override
@@ -172,7 +175,7 @@ class _CityDetailsPageState extends State<CityDetailsPage> {
         }, SetOptions(merge: true));
       }
     } catch (e) {
-      print('Error updating Firestore favorites: $e');
+      widget.logger.d('Error updating Firestore favorites: $e');
       // Handle errors appropriately
     }
   }

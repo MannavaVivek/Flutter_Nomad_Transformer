@@ -4,12 +4,15 @@ import 'content_classes.dart';
 import 'package:isar/isar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'city_content_page.dart';
+import 'package:logger/logger.dart';
 
 // HomePage widget
 class HomePage extends StatefulWidget {
   final Isar isar;
+  final Logger logger;
 
-  const HomePage({Key? key, required this.isar}) : super(key: key);
+  const HomePage({Key? key, required this.isar, required this.logger})
+      : super(key: key);
 
   @override
   HomePageState createState() => HomePageState();
@@ -133,6 +136,7 @@ class HomePageState extends State<HomePage> {
               countryName: country.name,
               isar: widget.isar,
               countryDescription: country.description,
+              logger: widget.logger,
             ),
           ),
         );
@@ -204,6 +208,7 @@ class HomePageState extends State<HomePage> {
                 builder: (context) => CityDetailsPage(
                   cityName: city.name,
                   isar: widget.isar,
+                  logger: widget.logger,
                 ),
               ),
             );

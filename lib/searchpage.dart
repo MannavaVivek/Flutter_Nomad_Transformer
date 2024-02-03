@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'content_classes.dart';
 import 'city_content_page.dart';
+import 'package:logger/logger.dart';
 
 class SearchPage extends StatefulWidget {
   final Isar isar;
+  final Logger logger;
 
-  const SearchPage({Key? key, required this.isar}) : super(key: key);
+  const SearchPage({Key? key, required this.isar, required this.logger})
+      : super(key: key);
 
   @override
   SearchPageState createState() => SearchPageState();
@@ -117,6 +120,7 @@ class SearchPageState extends State<SearchPage> {
                                 builder: (context) => CityDetailsPage(
                                   cityName: city.name,
                                   isar: widget.isar,
+                                  logger: widget.logger,
                                 ),
                               ),
                             );

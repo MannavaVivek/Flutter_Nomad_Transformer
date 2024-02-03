@@ -3,11 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:isar/isar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'content_classes.dart';
+import 'package:logger/logger.dart';
 
 class UserPage extends StatefulWidget {
   final Isar isar;
+  final Logger logger;
 
-  const UserPage({Key? key, required this.isar}) : super(key: key);
+  const UserPage({Key? key, required this.isar, required this.logger})
+      : super(key: key);
 
   @override
   UserPageState createState() => UserPageState();
@@ -47,6 +50,7 @@ class UserPageState extends State<UserPage> {
   }
 
   Widget _buildUserView(BuildContext context, Size constraints) {
+    widget.logger.d('Building user view');
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
@@ -140,6 +144,7 @@ class UserPageState extends State<UserPage> {
   }
 
   Widget _buildGuestView(BuildContext context) {
+    widget.logger.d('Building guest view');
     return SafeArea(
       child: SingleChildScrollView(
         child: Center(
@@ -335,7 +340,7 @@ class UserPageState extends State<UserPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.blue),
+              borderSide: const BorderSide(color: Colors.blue),
             ),
           ),
           keyboardType: TextInputType.emailAddress,
@@ -356,7 +361,7 @@ class UserPageState extends State<UserPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.blue),
+              borderSide: const BorderSide(color: Colors.blue),
             ),
           ),
           obscureText: true,
@@ -377,7 +382,7 @@ class UserPageState extends State<UserPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.blue),
+              borderSide: const BorderSide(color: Colors.blue),
             ),
           ),
           obscureText: true,

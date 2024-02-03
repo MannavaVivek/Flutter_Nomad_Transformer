@@ -5,11 +5,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'city_content_page.dart';
+import 'package:logger/logger.dart';
 
 class FavoritesPage extends StatefulWidget {
   final Isar isar;
+  final Logger logger;
 
-  const FavoritesPage({Key? key, required this.isar}) : super(key: key);
+  const FavoritesPage({Key? key, required this.isar, required this.logger})
+      : super(key: key);
 
   @override
   FavoritesPageState createState() => FavoritesPageState();
@@ -79,7 +82,7 @@ class FavoritesPageState extends State<FavoritesPage> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SizedBox.shrink();
               } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                print('Favorite cities: $favoriteCities');
+                widget.logger.d('Favorite cities: $favoriteCities');
                 return ListView.builder(
                   itemCount: favoriteCities.length,
                   itemBuilder: (context, index) {
@@ -93,6 +96,7 @@ class FavoritesPageState extends State<FavoritesPage> {
                             builder: (context) => CityDetailsPage(
                               cityName: city.name,
                               isar: widget.isar,
+                              logger: widget.logger,
                             ),
                           ),
                         ).then((value) => setState(() {
@@ -251,7 +255,7 @@ class FavoritesPageState extends State<FavoritesPage> {
   }
 
   Future<void> updateFirestoreFavorites() async {
-    print('Updating favorites in Firestore');
+    widget.logger.d('Updating favorites in Firestore');
     try {
       // Fetch the user's favorite blog posts from Isar
       final userId = FirebaseAuth.instance.currentUser?.uid ?? 'Guest';
@@ -276,7 +280,7 @@ class FavoritesPageState extends State<FavoritesPage> {
         }, SetOptions(merge: true));
       }
     } catch (e) {
-      print('Error updating Firestore favorites: $e');
+      widget.logger.d('Error updating Firestore favorites: $e');
       // Handle errors appropriately
     }
   }
