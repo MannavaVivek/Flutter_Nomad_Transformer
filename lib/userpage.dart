@@ -174,8 +174,16 @@ class UserPageState extends State<UserPage> {
   }
 
   Widget _buildLoginForm() {
+    String emailErrorText = '';
+    String passwordErrorText = '';
+
     return Column(
       children: <Widget>[
+        if (emailErrorText.isNotEmpty)
+          Text(
+            emailErrorText,
+            style: TextStyle(color: Colors.red),
+          ),
         TextField(
           decoration: InputDecoration(
             labelText: 'Email',
@@ -192,9 +200,19 @@ class UserPageState extends State<UserPage> {
             ),
           ),
           keyboardType: TextInputType.emailAddress,
-          onChanged: (value) => email = value,
+          onChanged: (value) {
+            setState(() {
+              email = value;
+              emailErrorText = ''; // Reset error text on change
+            });
+          },
         ),
         const SizedBox(height: 10),
+        if (passwordErrorText.isNotEmpty)
+          Text(
+            passwordErrorText,
+            style: TextStyle(color: Colors.red),
+          ),
         TextField(
           decoration: InputDecoration(
             labelText: 'Password',
@@ -211,16 +229,112 @@ class UserPageState extends State<UserPage> {
             ),
           ),
           obscureText: true,
-          onChanged: (value) => password = value,
+          onChanged: (value) {
+            setState(() {
+              password = value;
+              passwordErrorText = ''; // Reset error text on change
+            });
+          },
         ),
         const SizedBox(height: 30),
         ElevatedButton(
-          onPressed: () => _loginUser(email, password),
+          onPressed: () {
+            if (email.isEmpty) {
+              setState(() {
+                emailErrorText = 'Email cannot be empty';
+              });
+            }
+            if (password.isEmpty) {
+              setState(() {
+                passwordErrorText = 'Password cannot be empty';
+              });
+            }
+            if (email.isNotEmpty && password.isNotEmpty) {
+              _loginUser(email, password);
+            }
+          },
           child: const Text('Login'),
         ),
-        // TODO: Add forgot password functionality
+        TextButton(
+          onPressed: _forgotPassword,
+          child: const Text('Forgot Password?'),
+        ),
       ],
     );
+  }
+
+  void _forgotPassword() {
+    String email = ''; // Initialize email variable
+    GlobalKey<FormState> formKey = GlobalKey<FormState>(); // Add form key
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Form(
+            key: formKey, // Assign form key to the Form widget
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const Text('Enter your email'),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  onChanged: (value) => email = value,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  // Validate the form
+                  _resetPassword(context, email);
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Reset Password'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _resetPassword(BuildContext context, String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password reset email sent'),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to send password reset email: ${e.toString()}'),
+        ),
+      );
+    }
   }
 
   Widget _buildSignOutButton() {
@@ -311,6 +425,7 @@ class UserPageState extends State<UserPage> {
               'Too many requests. Please wait a while before trying again.';
           break;
         default:
+          // if text is not found, display the error message
           errorMessage = 'An error occurred during login. Please try again.';
       }
     } else {
